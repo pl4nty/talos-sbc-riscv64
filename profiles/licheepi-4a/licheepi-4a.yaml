@@ -1,4 +1,4 @@
-arch: arm64
+arch: riscv64
 platform: metal
 secureboot: false
 output:

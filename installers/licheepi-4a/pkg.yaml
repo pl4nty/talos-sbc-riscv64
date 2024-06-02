@@ -1,4 +1,4 @@
-name: board
+name: licheepi-4a
 variant: scratch
 shell: /toolchain/bin/bash
 dependencies:
@@ -14,12 +14,12 @@ steps:
         export PATH=${PATH}:${TOOLCHAIN}/go/bin
 
         cd /pkg/src
-        CGO_ENABLED=0 go build -o ./board .
+        CGO_ENABLED=0 go build -o ./licheepi-4a .
     install:
       - |
         mkdir -p /rootfs/installers/
 
-        cp -p /pkg/src/board /rootfs/installers/board
+        cp -p /pkg/src/licheepi-4a /rootfs/installers/licheepi-4a
 finalize:
   - from: /rootfs
     to: /rootfs

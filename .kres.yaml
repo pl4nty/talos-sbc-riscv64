@@ -2,16 +2,16 @@
 kind: pkgfile.Build
 spec:
   targets:
-    - sbc-board
+    - sbc-riscv64
   extraBuildArgs:
     - PKGS_PREFIX
     - PKGS
   makefile:
     extraVariables:
       - name: PKGS_PREFIX
-        defaultValue: ghcr.io/siderolabs
+        defaultValue: ghcr.io/pl4nty
       - name: PKGS
-        defaultValue: v1.7.0-alpha.0-33-g3aacf03
+        defaultValue: latest
 ---
 kind: common.Build
 spec:

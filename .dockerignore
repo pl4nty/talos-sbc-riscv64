@@ -2,5 +2,6 @@
 #
 # Generated on 2024-06-02T06:49:25Z by kres f249b6c.
 
-_out
-go.work.sum
+*
+!README.md
+!pkg.yaml
