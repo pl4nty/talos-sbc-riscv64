@@ -1,3 +1,3 @@
 go 1.22.1
 
-use ./installers/board/src
+use ./installers/licheepi-4a/src

@@ -1,11 +1,16 @@
-# syntax = ghcr.io/siderolabs/bldr:v0.3.0
+# syntax = ghcr.io/pl4nty/bldr
 
 format: v1alpha2
 
 vars:
   # renovate: datasource=github-tags extractVersion=^v(?<version>.*)$ depName=u-boot/u-boot
-  uboot_version: 2023.01
-  uboot_sha256: 69423bad380f89a0916636e89e6dcbd2e4512d584308d922d1039d1e4331950f
-  uboot_sha512: 417a28267eb7875820d08fafc7316f164663609378637539e71648b0b9b7d28796b6c381717f31b0ab6472805fefd32628ef7d1b2e7b9f3c51c8ad122993f679
+  uboot_version: 2024.07
+  uboot_sha256: f591da9ab90ef3d6b3d173766d0ddff90c4ed7330680897486117df390d83c8f
+  uboot_sha512: 678f44e2b9132140f0bf05c637e57e638c73c278611037a41824b3ebff2131af4dec0163da4664bb2e5c4fd8034ba8c95b93b57f7aa9f4c045da322d87c3b5e9
+
+  # renovate: datasource=git-refs versioning=git depName=https://github.com/revyos/thead-u-boot.git
+  uboot_thead_version: 93ff49d9f5bbe7942f727ab93311346173506d27
+  uboot_thead_sha256: 206f1990249f75c301792650943bdaabbb11ac2f102510fa18b03b8de74f9d60
+  uboot_thead_sha512: 7e156d14653ddc9086c89cd6e75db537be9f57239479e9a112d32180b6251b6b9b47c22c741450efe96c023ad56393e1ed646cee05f817044b0c9f23eaea41bc
 labels:
-  org.opencontainers.image.source: https://github.com/siderolabs/sbc-board
+  org.opencontainers.image.source: https://github.com/pl4nty/talos-sbc-riscv64
