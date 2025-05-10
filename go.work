@@ -1,3 +1,5 @@
-go 1.22.1
+go 1.24.0
 
-use ./installers/board/src
+toolchain go1.24.2
+
+use ./installers/licheepi-4a/src

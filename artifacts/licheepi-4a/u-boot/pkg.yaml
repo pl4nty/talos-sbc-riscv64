@@ -1,9 +1,9 @@
 # References:
 #   U-Boot:
 #     - https://u-boot.readthedocs.io/en/latest
-name: u-boot
+name: u-boot-licheepi-4a
 variant: scratch
-shell: /toolchain/bin/bash
+shell: /bin/bash
 dependencies:
   - stage: base
 steps:
@@ -16,22 +16,16 @@ steps:
       SOURCE_DATE_EPOCH: {{ .BUILD_ARG_SOURCE_DATE_EPOCH }}
     prepare:
       - |
-        mkdir -p /usr/bin \
-          && ln -sf /toolchain/bin/env /usr/bin/env \
-          && ln -sf /toolchain/bin/python3 /toolchain/bin/python
-
-        pip3 install pyelftools
-
         tar xf u-boot.tar.bz2 --strip-components=1
       - |
-        make board_defconfig
+        make th1520_lpi4a_defconfig
     build:
       - |
         make -j $(nproc) HOSTLDLIBS_mkimage="-lssl -lcrypto"
     install:
       - |
-        mkdir -p /rootfs/artifacts/arm64/u-boot/board
-        cp -v u-boot.bin /rootfs/artifacts/arm64/u-boot/board
+        mkdir -p /rootfs/artifacts/riscv64/u-boot/licheepi-4a
+        cp -v u-boot-dtb.bin /rootfs/artifacts/riscv64/u-boot/licheepi-4a
 finalize:
   - from: /rootfs
     to: /rootfs

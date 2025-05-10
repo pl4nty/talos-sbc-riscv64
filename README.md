@@ -1,18 +1,9 @@
-# sbc-template
+# sbc-riscv64
 
-This is a template repository to generate a new project for the SBC.
+This repo provides overlays for RISC-V Talos images. It's based on a fork so please [report issues here](https://github.com/pl4nty/talos) instead of upstream.
 
-The template already contains an example of building and copying over `u-boot`.
-This can be used as a starting point for your own project.
+## Supported Overlays
 
-## Requirements
-
-Using a sbc project templates assume docker is installed on your machine.
-
-## Usage
-
-* Create a new repository using this template.
-* Start by replacing `board` to `<your-board-name>`
-* Update `installers/<your-board-name>/src/main.go` with your own logic.
-* Run `make rekres`
-* Now run `make help` on instructions on setting up `buildx` builder if one is not already setup.
+| Overlay Name | Board                  | SoC     | Description                                                                                          |
+| -------------| ---------------------- | ------- | ---------------------------------------------------------------------------------------------------- |
+| licheepi-4a  | Sipeed LicheePi 4A 8GB | TH1520  | Overlay for Sipeed LicheePi 4A 8GB model. 16GB model isn't supported - open an issue if you want it. |
