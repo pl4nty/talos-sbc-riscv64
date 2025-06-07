@@ -27,6 +27,9 @@ type licheePi4AExtraOptions struct{}
 func (i *licheePi4AInstaller) GetOptions(extra licheePi4AExtraOptions) (overlay.Options, error) {
 	kernelArgs := []string{
 		"console=ttyS0,115200n8",
+		"console=ttyS1,115200n8",
+		"console=ttyS2,115200n8",
+		"console=ttyS3,115200n8",
 		"sysctl.kernel.kexec_load_disabled=1",
 		"talos.dashboard.disabled=1",
 	}
@@ -47,30 +50,21 @@ func (i *licheePi4AInstaller) Install(options overlay.InstallOptions[licheePi4AE
 
 	defer f.Close() //nolint:errcheck
 	
-	// ROM -> U-Boot SPL -> U-Boot -> kernel
-	// https://docs.u-boot.org/en/latest/board/thead/lpi4a.html
-	// vendor images use U-Boot SPL -> U-Boot -> OpenSBI -> kernel
+	// ROM -> U-Boot w/ SPL and DDR -> OpenSBI -> kernel
+	// https://patchwork.ozlabs.org/project/uboot/patch/20250530094851.57198-6-ziyao@disroot.org/
+	// vendor images use ROM -> vendor U-Boot -> OpenSBI -> kernel
 	// https://wiki.sipeed.com/hardware/en/lichee/th1520/lpi4a/4_burn_image.html#Board-Boot-Process
 
-	// use vendor SPL for now as 16GB only is in review
-	// https://patchwork.ozlabs.org/project/uboot/cover/20250426165704.35523-1-ziyao@disroot.org/
 	// can find the offsets from their "secboot" - 0 for SPL, 0x1c00000 for U-Boot
 	// https://github.com/revyos/thead-u-boot/blob/93ff49d9f5bbe7942f727ab93311346173506d27/board/thead/light-c910/boot.c#L679
-	ubootspl, err := os.ReadFile(filepath.Join(options.ArtifactsPath, "riscv64/u-boot/licheepi-4a/u-boot-with-spl-lpi4a.bin"))
-	if err != nil {
-		return err
-	}
-	if _, err = f.WriteAt(ubootspl, 0); err != nil {
-		return err
-	}
-	
-	uboot, err := os.ReadFile(filepath.Join(options.ArtifactsPath, "riscv64/u-boot/licheepi-4a/u-boot-dtb.bin"))
-	if err != nil {
-		return err
-	}
-	if _, err = f.WriteAt(uboot, 29360128); err != nil {
-		return err
-	}
+	// try a random offset
+	// uboot, err := os.ReadFile(filepath.Join(options.ArtifactsPath, "riscv64/u-boot/licheepi-4a/u-boot-with-spl.bin"))
+	// if err != nil {
+	// 	return err
+	// }
+	// if _, err = f.WriteAt(uboot, 1024 * 8); err != nil {
+	// 	return err
+	// }
 
 	// NB: In the case that the block device is a loopback device, we sync here
 	// to esure that the file is written before the loopback device is

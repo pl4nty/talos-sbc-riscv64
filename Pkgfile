@@ -4,13 +4,23 @@ format: v1alpha2
 
 vars:
   # renovate: datasource=github-tags extractVersion=^v(?<version>.*)$ depName=u-boot/u-boot
-  uboot_version: 2025.04
-  uboot_sha256: 439d3bef296effd54130be6a731c5b118be7fddd7fcc663ccbc5fb18294d8718
-  uboot_sha512: f2ce2d34880e347165656060ac2956050112ed4cd14cbca2ca736d2ad26f660bb09a17fe79b988f2702f0f65cf43d5263f9ff4d41338e3865962b7f9f01a0f0d
+  uboot_version: 2025.07-rc3
+  uboot_sha256: d2972c21d3e47254bad7b3136c61ba4740b6563276038421cceb5ab48d633a52
+  uboot_sha512: a57ec9f113467b4fad246de59be0975fd5d8bbc7dab9314275ca47ad56a294bbdc1d503096e44a293af2c3c151b130113f55d9d168886ce780d809046d4432ff
+
+  # renovate: datasource=github-tags extractVersion=^v(?<version>.*)$ depName=riscv-software-src/opensbi
+  opensbi_version: 1.6
+  opensbi_sha256: d11702103f177a2914e94eec57ce5ed820296d874f6b6525c4482e55d71a3667
+  opensbi_sha512: 2c6884566fffa6715cd1bec491d9891ba9f51a2c2b9abea87782c65cdd89d81054d0ad5503fbc5acfafa14917d9c565caa004d643d9d0724be3fd5aebfefb01b
 
   # renovate: datasource=git-refs versioning=git depName=https://github.com/revyos/thead-u-boot.git
   uboot_thead_version: 93ff49d9f5bbe7942f727ab93311346173506d27
   uboot_thead_sha256: 206f1990249f75c301792650943bdaabbb11ac2f102510fa18b03b8de74f9d60
   uboot_thead_sha512: 7e156d14653ddc9086c89cd6e75db537be9f57239479e9a112d32180b6251b6b9b47c22c741450efe96c023ad56393e1ed646cee05f817044b0c9f23eaea41bc
+
+  # renovate: datasource=git-refs versioning=git depName=https://github.com/ziyao233/th1520-firmware.git
+  th1520_firmware_ref: a7595482097e5f852655cd537e65eb0325b81845
+  th1520_firmware_sha256: 4009f25a333a81c70247344cd73d0bf7b5260d0e3ca23bebb45cb9b03341c3e8
+  th1520_firmware_sha512: 9b48bb4c0fb33a3533ab890c447bdcaaa1e4d1bc255b0fa710a5114ed1e3bc4a1902e1400ab9a8e8215c95642ce525a2eb67db60f099ee8098e1d548b407b8ae
 labels:
   org.opencontainers.image.source: https://github.com/pl4nty/talos-sbc-riscv64

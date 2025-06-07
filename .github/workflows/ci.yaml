@@ -1,5 +1,6 @@
 env:
   PLATFORM: linux/riscv64
+  IMAGE_TAG_IN: 74ea95a52
 
 name: default
 concurrency:
@@ -25,12 +26,12 @@ jobs:
       packages: write
       pull-requests: read
     runs-on:
-      - ubuntu-latest
+      - namespace-profile-cached
     if: (!startsWith(github.head_ref, 'renovate/') && !startsWith(github.head_ref, 'dependabot/'))
     steps:
       - name: gather-system-info
         id: system-info
-        uses: kenchan0130/actions-system-info@v1.3.0
+        uses: kenchan0130/actions-system-info@v1.3.1
         continue-on-error: true
       - name: print-system-info
         run: |
@@ -78,16 +79,6 @@ jobs:
         if: github.event_name != 'pull_request'
         run: |
           make  PUSH=true
-      - name: images
-        run: |
-          for profile in profiles/*/; do
-            make image-metal IMAGER_ARGS="--overlay-name=$(basename $profile)" IMAGE_TAG_IN=latest
-          done
-      - name: save artifacts
-        uses: actions/upload-artifact@v4
-        with:
-          name: talos-images
-          path: _out/*.zst
       - name: release-notes
         if: startsWith(github.ref, 'refs/tags/')
         run: |
@@ -98,3 +89,53 @@ jobs:
         with:
           body_path: _out/RELEASE_NOTES.md
           draft: "true"
+  # Need GitHub runner for /dev/ptmx
+  images:
+    needs: default
+    runs-on: ubuntu-latest
+    steps:
+      - name: gather-system-info
+        id: system-info
+        uses: kenchan0130/actions-system-info@v1.3.1
+        continue-on-error: true
+      - name: print-system-info
+        run: |
+          MEMORY_GB=$((${{ steps.system-info.outputs.totalmem }}/1024/1024/1024))
+
+          OUTPUTS=(
+            "CPU Core: ${{ steps.system-info.outputs.cpu-core }}"
+            "CPU Model: ${{ steps.system-info.outputs.cpu-model }}"
+            "Hostname: ${{ steps.system-info.outputs.hostname }}"
+            "NodeName: ${NODE_NAME}"
+            "Kernel release: ${{ steps.system-info.outputs.kernel-release }}"
+            "Kernel version: ${{ steps.system-info.outputs.kernel-version }}"
+            "Name: ${{ steps.system-info.outputs.name }}"
+            "Platform: ${{ steps.system-info.outputs.platform }}"
+            "Release: ${{ steps.system-info.outputs.release }}"
+            "Total memory: ${MEMORY_GB} GB"
+          )
+
+          for OUTPUT in "${OUTPUTS[@]}";do
+            echo "${OUTPUT}"
+          done
+        continue-on-error: true
+      - name: checkout
+        uses: actions/checkout@v4
+      - name: Unshallow
+        run: |
+          git fetch --prune --unshallow
+      - name: Set up QEMU
+        uses: docker/setup-qemu-action@v3
+      - name: Set up Docker Buildx
+        id: setup-buildx
+        uses: docker/setup-buildx-action@v3
+      - name: images
+        run: |
+          make image-metal
+          for profile in profiles/*/; do
+            make image-$(basename $profile) IMAGER_ARGS="--overlay-name=$(basename $profile) --overlay-image \$(REGISTRY_AND_USERNAME)/\$(TARGETS):\$(TAG)"
+          done
+      - name: save artifacts
+        uses: nanoufo/action-upload-artifacts-and-release-assets@v2
+        with:
+          path: _out/*.raw.*

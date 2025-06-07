@@ -1,0 +1,26 @@
+name: th1520-firmware
+variant: scratch
+shell: /bin/bash
+dependencies:
+  - stage: base
+steps:
+  - sources:
+      - url: https://github.com/ziyao233/th1520-firmware/archive/{{ .th1520_firmware_ref }}.tar.gz
+        destination: th1520-firmware.tar.gz
+        sha256: "{{ .th1520_firmware_sha256 }}"
+        sha512: "{{ .th1520_firmware_sha512 }}"
+    env:
+      SOURCE_DATE_EPOCH: {{ .BUILD_ARG_SOURCE_DATE_EPOCH }}
+    prepare:
+      - |
+        tar xf th1520-firmware.tar.gz --strip-components=1
+    build:
+      - |
+        lua ddr-generate.lua src/lpddr4x-3733-dualrank.lua th1520-ddr-firmware.bin
+    install:
+      - |
+        mkdir -p /rootfs/artifacts/riscv64/th1520-firmware
+        cp -v th1520-ddr-firmware.bin /rootfs/artifacts/riscv64/th1520-firmware
+finalize:
+  - from: /rootfs
+    to: /rootfs

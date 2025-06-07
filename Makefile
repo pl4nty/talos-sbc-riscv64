@@ -168,5 +168,5 @@ image-%: ## Builds the specified image. Valid options are aws, azure, digital-oc
 	@docker pull $(REGISTRY_AND_USERNAME)/imager:$(IMAGE_TAG_IN)
 	@for platform in $(subst $(,),$(space),$(PLATFORM)); do \
 		arch=$$(basename "$${platform}") && \
-		docker run --rm -t -v /dev:/dev -v $(PWD)/$(ARTIFACTS):/secureboot:ro -v $(PWD)/$(ARTIFACTS):/out -e SOURCE_DATE_EPOCH=$(SOURCE_DATE_EPOCH) --network=host --privileged $(REGISTRY_AND_USERNAME)/imager:$(IMAGE_TAG_IN) $* --arch $$arch --base-installer-image $(REGISTRY_AND_USERNAME)/installer-base:$(IMAGE_TAG_IN) --overlay-image $(REGISTRY_AND_USERNAME)/$(TARGETS):$(TAG) $(IMAGER_ARGS) ; \
+		docker run --rm -t -v /dev:/dev -v $(PWD)/$(ARTIFACTS):/secureboot:ro -v $(PWD)/$(ARTIFACTS):/out -e SOURCE_DATE_EPOCH=$(SOURCE_DATE_EPOCH) --network=host --privileged $(REGISTRY_AND_USERNAME)/imager:$(IMAGE_TAG_IN) $* --arch $$arch --base-installer-image $(REGISTRY_AND_USERNAME)/installer-base:$(IMAGE_TAG_IN) $(IMAGER_ARGS) ; \
 	done

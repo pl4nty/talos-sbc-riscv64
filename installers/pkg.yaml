@@ -6,8 +6,6 @@ dependencies:
   - stage: profiles
   - stage: u-boot-licheepi-4a
     platform: linux/riscv64
-  - stage: u-boot-thead-licheepi-4a
-    platform: linux/riscv64
   - image: "{{ .BUILD_ARG_PKGS_PREFIX }}/kernel:{{ .BUILD_ARG_PKGS }}"
     platform: linux/riscv64
     from: /dtb/thead/th1520-lichee-pi-4a.dtb
