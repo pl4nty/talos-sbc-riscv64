@@ -1,0 +1,26 @@
+name: opensbi
+variant: scratch
+shell: /bin/bash
+dependencies:
+  - stage: base
+steps:
+  - sources:
+      - url: https://github.com/riscv-software-src/opensbi/archive/refs/tags/v{{ .opensbi_version }}.tar.gz
+        destination: opensbi.tar.gz
+        sha256: "{{ .opensbi_sha256 }}"
+        sha512: "{{ .opensbi_sha512 }}"
+    env:
+      SOURCE_DATE_EPOCH: {{ .BUILD_ARG_SOURCE_DATE_EPOCH }}
+    prepare:
+      - |
+        tar xf opensbi.tar.gz --strip-components=1
+    build:
+      - |
+        make -j $(nproc) PLATFORM=generic
+    install:
+      - |
+        mkdir -p /rootfs/artifacts/riscv64/opensbi
+        cp -v build/platform/generic/firmware/fw_*.bin /rootfs/artifacts/riscv64/opensbi
+finalize:
+  - from: /rootfs
+    to: /rootfs

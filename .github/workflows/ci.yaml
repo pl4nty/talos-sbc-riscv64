@@ -25,12 +25,12 @@ jobs:
       packages: write
       pull-requests: read
     runs-on:
-      - ubuntu-latest
+      - namespace-profile-cached
     if: (!startsWith(github.head_ref, 'renovate/') && !startsWith(github.head_ref, 'dependabot/'))
     steps:
       - name: gather-system-info
         id: system-info
-        uses: kenchan0130/actions-system-info@v1.3.0
+        uses: kenchan0130/actions-system-info@v1.3.1
         continue-on-error: true
       - name: print-system-info
         run: |
@@ -81,7 +81,7 @@ jobs:
       - name: images
         run: |
           for profile in profiles/*/; do
-            make image-metal IMAGER_ARGS="--overlay-name=$(basename $profile)" IMAGE_TAG_IN=latest
+            make image-metal IMAGER_ARGS="--overlay-name=$(basename $profile)" TAG=latest
           done
       - name: save artifacts
         uses: actions/upload-artifact@v4
