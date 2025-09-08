@@ -6,16 +6,16 @@ spec:
   extraBuildArgs:
     - PKGS_PREFIX
     - PKGS
+    - TOOLS_PREFIX
+    - TOOLS
   makefile:
     extraVariables:
-      - name: PKGS_PREFIX
-        defaultValue: ghcr.io/pl4nty
-      - name: PKGS
-        defaultValue: latest
-      - name: TOOLS_PREFIX
-        defaultValue: ghcr.io/pl4nty
-      - name: TOOLS
-        defaultValue: latest
+      - name: TAG_SUFFIX
+      - name: TAG_SUFFIX_IN
+        defaultValue: $(TAG_SUFFIX)
+      - name: IMAGE_TAG_IN
+        defaultValue: $(TAG)$(TAG_SUFFIX_IN)
+      - name: IMAGER_ARGS
 ---
 kind: common.Build
 spec:

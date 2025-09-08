@@ -1,16 +1,12 @@
 # THIS FILE WAS AUTOMATICALLY GENERATED, PLEASE DO NOT EDIT.
 #
-# Generated on 2025-05-10T05:08:58Z by kres 5ad3e5f.
+# Generated on 2025-09-08T06:32:56Z by kres cc45611.
 
 # common variables
 
 SHA := $(shell git describe --match=none --always --abbrev=8 --dirty)
 TAG := $(shell git describe --tag --always --dirty --match v[0-9]\*)
 ABBREV_TAG := $(shell git describe --tags >/dev/null 2>/dev/null && git describe --tag --always --match v[0-9]\* --abbrev=0 || echo 'undefined')
-TAG_SUFFIX ?=
-TAG_SUFFIX_IN ?= $(TAG_SUFFIX)
-IMAGE_TAG_IN ?= $(TAG)$(TAG_SUFFIX_IN)
-IMAGER_ARGS ?=
 BRANCH := $(shell git rev-parse --abbrev-ref HEAD)
 ARTIFACTS := _out
 IMAGE_TAG ?= $(TAG)
@@ -29,7 +25,7 @@ SOURCE_DATE_EPOCH := $(shell git log $(INITIAL_COMMIT_SHA) --pretty=%ct)
 
 # sync bldr image with pkgfile
 
-BLDR_RELEASE := v0.4.1
+BLDR_RELEASE := v0.5.3
 BLDR_IMAGE := ghcr.io/siderolabs/bldr:$(BLDR_RELEASE)
 BLDR := docker run --rm --user $(shell id -u):$(shell id -g) --volume $(PWD):/src --entrypoint=/bldr $(BLDR_IMAGE) --root=/src
 
@@ -40,22 +36,23 @@ PLATFORM ?= linux/amd64,linux/arm64
 PROGRESS ?= auto
 PUSH ?= false
 CI_ARGS ?=
+BUILD_ARGS = --build-arg=SOURCE_DATE_EPOCH=$(SOURCE_DATE_EPOCH)
+BUILD_ARGS += --build-arg=PKGS_PREFIX="$(PKGS_PREFIX)"
+BUILD_ARGS += --build-arg=PKGS="$(PKGS)"
+BUILD_ARGS += --build-arg=TOOLS_PREFIX="$(TOOLS_PREFIX)"
+BUILD_ARGS += --build-arg=TOOLS="$(TOOLS)"
 COMMON_ARGS = --file=Pkgfile
 COMMON_ARGS += --provenance=false
 COMMON_ARGS += --progress=$(PROGRESS)
 COMMON_ARGS += --platform=$(PLATFORM)
-COMMON_ARGS += --build-arg=SOURCE_DATE_EPOCH=$(SOURCE_DATE_EPOCH)
-COMMON_ARGS += --build-arg=PKGS_PREFIX="$(PKGS_PREFIX)"
-COMMON_ARGS += --build-arg=PKGS="$(PKGS)"
-COMMON_ARGS += --build-arg=TOOLS_PREFIX="$(TOOLS_PREFIX)"
-COMMON_ARGS += --build-arg=TOOLS="$(TOOLS)"
+COMMON_ARGS += $(BUILD_ARGS)
 
 # extra variables
 
-PKGS_PREFIX ?= ghcr.io/pl4nty
-PKGS ?= latest
-TOOLS_PREFIX ?= ghcr.io/pl4nty
-TOOLS ?= latest
+TAG_SUFFIX ?=
+TAG_SUFFIX_IN ?= $(TAG_SUFFIX)
+IMAGE_TAG_IN ?= $(TAG)$(TAG_SUFFIX_IN)
+IMAGER_ARGS ?=
 
 # targets defines all the available targets
 
@@ -141,9 +138,10 @@ reproducibility-test-local-%:  ## Builds the specified target defined in the Pkg
 $(TARGETS):
 	@$(MAKE) docker-$@ TARGET_ARGS="--tag=$(REGISTRY_AND_USERNAME)/$@:$(TAG) --push=$(PUSH)"
 
-.PHONY: deps.png
-deps.png:  ## Generates a dependency graph of the Pkgfile.
-	@$(BLDR) graph | dot -Tpng -o deps.png
+.PHONY: deps.svg
+deps.svg:  ## Generates a dependency graph of the Pkgfile.
+	@rm -f deps.png
+	@$(BLDR) graph $(BUILD_ARGS) | dot -Tsvg -o deps.svg
 
 .PHONY: rekres
 rekres:
