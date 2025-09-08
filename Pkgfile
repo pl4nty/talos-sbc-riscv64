@@ -4,14 +4,14 @@ format: v1alpha2
 
 vars:
   # renovate: datasource=github-tags extractVersion=^v(?<version>.*)$ depName=u-boot/u-boot
-  uboot_version: 2025.07-rc3
-  uboot_sha256: d2972c21d3e47254bad7b3136c61ba4740b6563276038421cceb5ab48d633a52
-  uboot_sha512: a57ec9f113467b4fad246de59be0975fd5d8bbc7dab9314275ca47ad56a294bbdc1d503096e44a293af2c3c151b130113f55d9d168886ce780d809046d4432ff
+  uboot_version: 2025.10-rc3
+  uboot_sha256: 1224f85046da9a8687df26b7f87ce74fe3b29d40b0151b06f9add88be5c3dc9d
+  uboot_sha512: d3c9d72a559e9b28b6647e93fe1eda99249b20785fed17fb139560a5d97cb1128c51e90eda8e7b34e190932e3dbf5c135deeb1c58f7e3ae1c54716e68ad886df
 
   # renovate: datasource=github-tags extractVersion=^v(?<version>.*)$ depName=riscv-software-src/opensbi
-  opensbi_version: 1.6
-  opensbi_sha256: d11702103f177a2914e94eec57ce5ed820296d874f6b6525c4482e55d71a3667
-  opensbi_sha512: 2c6884566fffa6715cd1bec491d9891ba9f51a2c2b9abea87782c65cdd89d81054d0ad5503fbc5acfafa14917d9c565caa004d643d9d0724be3fd5aebfefb01b
+  opensbi_version: 1.7
+  opensbi_sha256: 2cf856a4e5e2e052948ddb54ba48232b1f698b7f52e0374fc7d17d51e8c8f7ce
+  opensbi_sha512: 2481c37ed912ef756089cfd39bb2b34417981ed273ff0365d0933e761619b481a8ce8bd88951a2a9cccef4bcb4a73c4aff63fd7bd5bbebc3e8cdcc1cd90a39a4
 
   # renovate: datasource=git-refs versioning=git depName=https://github.com/revyos/thead-u-boot.git
   uboot_thead_version: 93ff49d9f5bbe7942f727ab93311346173506d27

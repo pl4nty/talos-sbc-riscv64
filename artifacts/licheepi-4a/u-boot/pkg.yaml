@@ -14,23 +14,14 @@ steps:
         destination: u-boot.tar.bz2
         sha256: "{{ .uboot_sha256 }}"
         sha512: "{{ .uboot_sha512 }}"
-      - url: https://patchwork.ozlabs.org/series/458992/mbox/
-        destination: Convert-Lichee-Pi-4A-to-use-S-Mode-proper-U-Boot.patch
-        sha256: cd99766f6d081aa53dc4e557f4f8aa1d4657f9fae9cef94710340a89371c7384
-        sha512: dffac7b95ac98a56b14e4588c8768c64c485438fa52d2ff0675768491409f62bf2e5f779d936d52dfd4fd9777712dfaf2d86cc2d18de65acc048f0e50905ee54
-      - url: https://patchwork.ozlabs.org/series/459751/mbox/
-        destination: Support-T-Head-C900-CLINT.patch
-        sha256: ebbcc88f5ad49beb3d9891c0f843057122f547bf491c77b4ce5fb4e6880fc197
-        sha512: cbd346493829d5186e40021e81acfbbdfdb51bc984df67e99578e287cd33abce8faa49adf76368add32fde9a98ad25934a36ef9f5d335b2f07415fffe32cd3b6
     env:
       SOURCE_DATE_EPOCH: {{ .BUILD_ARG_SOURCE_DATE_EPOCH }}
     prepare:
       - |
         tar xf u-boot.tar.bz2 --strip-components=1
       - |
-        mv *.patch /pkg/patches
         for patch in $(find /pkg/patches -type f -name "*.patch" | sort); do
-          echo "Applying $patch"
+          echo "Applying patch $patch"
           patch -p1 < $patch || (echo "Failed to apply patch $patch" && exit 1)
         done
       - |

@@ -1,6 +1,6 @@
 env:
   PLATFORM: linux/riscv64
-  IMAGE_TAG_IN: 74ea95a52
+  IMAGE_TAG_IN: 895f8c49e
 
 name: default
 concurrency:
