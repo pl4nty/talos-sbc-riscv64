@@ -4,19 +4,14 @@ format: v1alpha2
 
 vars:
   # renovate: datasource=github-tags extractVersion=^v(?<version>.*)$ depName=u-boot/u-boot
-  uboot_version: 2025.10-rc3
-  uboot_sha256: 1224f85046da9a8687df26b7f87ce74fe3b29d40b0151b06f9add88be5c3dc9d
-  uboot_sha512: d3c9d72a559e9b28b6647e93fe1eda99249b20785fed17fb139560a5d97cb1128c51e90eda8e7b34e190932e3dbf5c135deeb1c58f7e3ae1c54716e68ad886df
+  uboot_version: 2025.10-rc4
+  uboot_sha256: a30574d74a4a761ed683a2b74d938ddb89e3ffacc3b2a6aabf3f40be91d03ebe
+  uboot_sha512: 38ad2be3b214d7cfd8479e9528b227a45d1f9ec1f032a7117af7f73708ca9abdf9fc14c46d74c4771ebbb838c1edf178676062881eb5fb499738aa99c3ef9bbb
 
   # renovate: datasource=github-tags extractVersion=^v(?<version>.*)$ depName=riscv-software-src/opensbi
   opensbi_version: 1.7
   opensbi_sha256: 2cf856a4e5e2e052948ddb54ba48232b1f698b7f52e0374fc7d17d51e8c8f7ce
   opensbi_sha512: 2481c37ed912ef756089cfd39bb2b34417981ed273ff0365d0933e761619b481a8ce8bd88951a2a9cccef4bcb4a73c4aff63fd7bd5bbebc3e8cdcc1cd90a39a4
-
-  # renovate: datasource=git-refs versioning=git depName=https://github.com/revyos/thead-u-boot.git
-  uboot_thead_version: 93ff49d9f5bbe7942f727ab93311346173506d27
-  uboot_thead_sha256: 206f1990249f75c301792650943bdaabbb11ac2f102510fa18b03b8de74f9d60
-  uboot_thead_sha512: 7e156d14653ddc9086c89cd6e75db537be9f57239479e9a112d32180b6251b6b9b47c22c741450efe96c023ad56393e1ed646cee05f817044b0c9f23eaea41bc
 
   # renovate: datasource=git-refs versioning=git depName=https://github.com/ziyao233/th1520-firmware.git
   th1520_firmware_ref: a7595482097e5f852655cd537e65eb0325b81845
