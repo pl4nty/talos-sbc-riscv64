@@ -37,12 +37,14 @@ diff --git a/include/configs/th1520_lpi4a.h b/include/configs/th1520_lpi4a.h
 index 7a9b70a3678..61a923140ae 100644
 --- a/include/configs/th1520_lpi4a.h
 +++ b/include/configs/th1520_lpi4a.h
-@@ -19,6 +19,7 @@
+@@ -19,6 +19,9 @@
  /* Environment options */
  
  #define CFG_EXTRA_ENV_SETTINGS \
 -	"PS1=[LPi4A]# \0"
 +	"PS1=[LPi4A]# \0" \
++ "setenv fdt_addr_r 0x1f00000 \0" \
++ "fatload mmc 0:1 $fdt_addr_r dtb/thead/th1520-lichee-pi-4a.dtb \0" \
 +	"bootcmd=bootefi bootmgr\0"
  
  #endif /* __TH1520_LPI4A_H */

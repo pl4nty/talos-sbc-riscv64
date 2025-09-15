@@ -1,8 +1,8 @@
 env:
   PLATFORM: linux/riscv64
-  IMAGE_TAG_IN: 65ff453ff
+  IMAGE_TAG_IN: 149c7b8ea
   PKGS_PREFIX: ghcr.io/${{ github.repository_owner }}
-  PKGS: cbda039
+  PKGS: 1db1a6c
   TOOLS_PREFIX: ghcr.io/${{ github.repository_owner }}
   TOOLS: v1.12.0-alpha.0-7-g4a9b676
 
