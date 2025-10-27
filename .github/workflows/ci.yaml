@@ -1,10 +1,10 @@
 env:
   PLATFORM: linux/riscv64
-  IMAGE_TAG_IN: 149c7b8ea
-  PKGS_PREFIX: ghcr.io/${{ github.repository_owner }}
-  PKGS: 1db1a6c
   TOOLS_PREFIX: ghcr.io/${{ github.repository_owner }}
-  TOOLS: v1.12.0-alpha.0-7-g4a9b676
+  TOOLS: 297acde
+  PKGS_PREFIX: ghcr.io/${{ github.repository_owner }}
+  PKGS: 468f3a8
+  IMAGE_TAG_IN: 09e69c845
 
 concurrency:
   group: ${{ github.head_ref || github.run_id }}

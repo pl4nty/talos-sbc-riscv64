@@ -1,12 +1,12 @@
-# syntax = ghcr.io/pl4nty/bldr
+# syntax = ghcr.io/pl4nty/bldr:4b1d7bb
 
 format: v1alpha2
 
 vars:
   # renovate: datasource=github-tags extractVersion=^v(?<version>.*)$ depName=u-boot/u-boot
-  uboot_version: 2025.10-rc4
-  uboot_sha256: a30574d74a4a761ed683a2b74d938ddb89e3ffacc3b2a6aabf3f40be91d03ebe
-  uboot_sha512: 38ad2be3b214d7cfd8479e9528b227a45d1f9ec1f032a7117af7f73708ca9abdf9fc14c46d74c4771ebbb838c1edf178676062881eb5fb499738aa99c3ef9bbb
+  uboot_version: 2025.10
+  uboot_sha256: b4f032848e56cc8f213ad59f9132c084dbbb632bc29176d024e58220e0efdf4a
+  uboot_sha512: 01ac8b2b36bd73b7accc22afd20cf45d08ff8ece6a3d1c426ec90936d1767245add92572cc162500b2160bbc0e2ceed3e111a2a0dd35f8f3a86edbd4fc78753c
 
   # renovate: datasource=github-tags extractVersion=^v(?<version>.*)$ depName=riscv-software-src/opensbi
   opensbi_version: 1.7
