@@ -34,7 +34,7 @@ steps:
     install:
       - |
         mkdir -p /rootfs/artifacts/riscv64/u-boot/licheepi-4a
-        cp -v u-boot-*.bin /rootfs/artifacts/riscv64/u-boot/licheepi-4a
+        cp -v u-boot* /rootfs/artifacts/riscv64/u-boot/licheepi-4a
 finalize:
   - from: /rootfs
     to: /rootfs

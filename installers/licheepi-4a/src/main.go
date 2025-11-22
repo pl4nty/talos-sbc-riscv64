@@ -26,10 +26,8 @@ type licheePi4AExtraOptions struct{}
 
 func (i *licheePi4AInstaller) GetOptions(extra licheePi4AExtraOptions) (overlay.Options, error) {
 	kernelArgs := []string{
-		"console=ttyS0,115200n8",
-		"console=ttyS1,115200n8",
-		"console=ttyS2,115200n8",
-		"console=ttyS3,115200n8",
+		"console=tty0",
+		"console=ttyS0,115200",
 		"sysctl.kernel.kexec_load_disabled=1",
 		"talos.dashboard.disabled=1",
 	}
