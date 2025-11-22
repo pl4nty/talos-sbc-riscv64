@@ -10,6 +10,8 @@ dependencies:
     platform: linux/riscv64
     from: /dtb/thead/th1520-lichee-pi-4a.dtb
     to: /rootfs/artifacts/riscv64/dtb/thead/th1520-lichee-pi-4a.dtb
+  - stage: u-boot-qemu
+    platform: linux/riscv64
 finalize:
   - from: /rootfs
     to: /
