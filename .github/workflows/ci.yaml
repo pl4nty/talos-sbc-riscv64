@@ -3,8 +3,8 @@ env:
   TOOLS_PREFIX: ghcr.io/${{ github.repository_owner }}
   TOOLS: 297acde
   PKGS_PREFIX: ghcr.io/${{ github.repository_owner }}
-  PKGS: 2c22635
-  IMAGE_TAG_IN: 56935082a
+  PKGS: 06df2a2
+  IMAGE_TAG_IN: ea857d9b5
 
 concurrency:
   group: ${{ github.head_ref || github.run_id }}
