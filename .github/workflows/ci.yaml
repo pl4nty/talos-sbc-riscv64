@@ -135,7 +135,6 @@ jobs:
         uses: docker/setup-buildx-action@v3
       - name: images
         run: |
-          make image-metal
           for profile in profiles/*/; do
             make image-$(basename $profile) IMAGER_ARGS="--overlay-name=$(basename $profile) --overlay-image \$(REGISTRY_AND_USERNAME)/\$(TARGETS):\$(TAG)"
           done
