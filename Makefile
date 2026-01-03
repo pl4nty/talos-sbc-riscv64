@@ -1,15 +1,16 @@
 # THIS FILE WAS AUTOMATICALLY GENERATED, PLEASE DO NOT EDIT.
 #
-# Generated on 2025-09-08T06:32:56Z by kres cc45611.
+# Generated on 2026-01-03T06:18:27Z by kres 8a4aebf.
 
 # common variables
 
 SHA := $(shell git describe --match=none --always --abbrev=8 --dirty)
 TAG := $(shell git describe --tag --always --dirty --match v[0-9]\*)
+TAG_SUFFIX ?=
 ABBREV_TAG := $(shell git describe --tags >/dev/null 2>/dev/null && git describe --tag --always --match v[0-9]\* --abbrev=0 || echo 'undefined')
 BRANCH := $(shell git rev-parse --abbrev-ref HEAD)
 ARTIFACTS := _out
-IMAGE_TAG ?= $(TAG)
+IMAGE_TAG ?= $(TAG)$(TAG_SUFFIX)
 OPERATING_SYSTEM := $(shell uname -s | tr '[:upper:]' '[:lower:]')
 GOARCH := $(shell uname -m | sed 's/x86_64/amd64/' | sed 's/aarch64/arm64/')
 REGISTRY ?= ghcr.io
@@ -25,7 +26,7 @@ SOURCE_DATE_EPOCH := $(shell git log $(INITIAL_COMMIT_SHA) --pretty=%ct)
 
 # sync bldr image with pkgfile
 
-BLDR_RELEASE := v0.5.3
+BLDR_RELEASE := v0.5.6
 BLDR_IMAGE := ghcr.io/siderolabs/bldr:$(BLDR_RELEASE)
 BLDR := docker run --rm --user $(shell id -u):$(shell id -g) --volume $(PWD):/src --entrypoint=/bldr $(BLDR_IMAGE) --root=/src
 
@@ -36,6 +37,7 @@ PLATFORM ?= linux/amd64,linux/arm64
 PROGRESS ?= auto
 PUSH ?= false
 CI_ARGS ?=
+WITH_BUILD_DEBUG ?=
 BUILD_ARGS = --build-arg=SOURCE_DATE_EPOCH=$(SOURCE_DATE_EPOCH)
 BUILD_ARGS += --build-arg=PKGS_PREFIX="$(PKGS_PREFIX)"
 BUILD_ARGS += --build-arg=PKGS="$(PKGS)"
@@ -108,6 +110,10 @@ respectively.
 
 endef
 
+ifneq (, $(filter $(WITH_BUILD_DEBUG), t true TRUE y yes 1))
+BUILD := BUILDX_EXPERIMENTAL=1 docker buildx debug --invoke /bin/sh --on error build
+endif
+
 all: $(TARGETS)  ## Builds all targets defined.
 
 $(ARTIFACTS):  ## Creates artifacts directory.
@@ -134,6 +140,14 @@ reproducibility-test-local-%:  ## Builds the specified target defined in the Pkg
 	@diffoscope $(ARTIFACTS)/build-a $(ARTIFACTS)/build-b
 	@rm -rf $(ARTIFACTS)/build-a $(ARTIFACTS)/build-b
 
+$(ARTIFACTS)/bldr: $(ARTIFACTS)  ## Downloads bldr binary.
+	@curl -sSL https://github.com/siderolabs/bldr/releases/download/$(BLDR_RELEASE)/bldr-$(OPERATING_SYSTEM)-$(GOARCH) -o $(ARTIFACTS)/bldr
+	@chmod +x $(ARTIFACTS)/bldr
+
+.PHONY: update-checksums
+update-checksums: $(ARTIFACTS)/bldr  ## Updates the checksums in the Pkgfile/vars.yaml based on the changed version variables.
+	@git diff -U0 | $(ARTIFACTS)/bldr update
+
 .PHONY: $(TARGETS)
 $(TARGETS):
 	@$(MAKE) docker-$@ TARGET_ARGS="--tag=$(REGISTRY_AND_USERNAME)/$@:$(TAG) --push=$(PUSH)"
@@ -142,6 +156,29 @@ $(TARGETS):
 deps.svg:  ## Generates a dependency graph of the Pkgfile.
 	@rm -f deps.png
 	@$(BLDR) graph $(BUILD_ARGS) | dot -Tsvg -o deps.svg
+
+image-%:
+	@docker pull $(REGISTRY_AND_USERNAME)/imager:$(IMAGE_TAG_IN)
+	@for platform in $(subst $(,),$(space),$(PLATFORM)); do \
+	  arch=$$(basename "$${platform}") && \
+	  docker run --rm -t \
+	    --network=host \
+	    -v $(PWD)/$(ARTIFACTS):/secureboot:ro \
+	    -v $(PWD)/$(ARTIFACTS):/out \
+	    -e GITHUB_TOKEN \
+	    -e SOURCE_DATE_EPOCH=$(SOURCE_DATE_EPOCH) \
+	    -e DETERMINISTIC_SEED=1 \
+	    $(REGISTRY_AND_USERNAME)/imager:$(IMAGE_TAG_IN) $* \
+	    --arch $$arch \
+	    --base-installer-image $(REGISTRY_AND_USERNAME)/installer-base:$(IMAGE_TAG_IN) \
+	    $(IMAGER_ARGS) ; \
+	done
+
+images:
+	@for profile in profiles/*/; do \
+	  target=$$(basename "$${profile}") && \
+	  $(MAKE) image-$$target IMAGER_ARGS="--overlay-name $$target --overlay-image $(REGISTRY_AND_USERNAME)/$(TARGETS):$(TAG)" ; \
+	done
 
 .PHONY: rekres
 rekres:
@@ -162,9 +199,3 @@ conformance:
 	@docker pull $(CONFORMANCE_IMAGE)
 	@docker run --rm -it -v $(PWD):/src -w /src $(CONFORMANCE_IMAGE) enforce
 
-image-%: ## Builds the specified image. Valid options are aws, azure, digital-ocean, gcp, and vmware (e.g. image-aws)
-	@docker pull $(REGISTRY_AND_USERNAME)/imager:$(IMAGE_TAG_IN)
-	@for platform in $(subst $(,),$(space),$(PLATFORM)); do \
-		arch=$$(basename "$${platform}") && \
-		docker run --rm -t -v /dev:/dev -v $(PWD)/$(ARTIFACTS):/secureboot:ro -v $(PWD)/$(ARTIFACTS):/out -e SOURCE_DATE_EPOCH=$(SOURCE_DATE_EPOCH) --network=host --privileged $(REGISTRY_AND_USERNAME)/imager:$(IMAGE_TAG_IN) $* --arch $$arch --base-installer-image $(REGISTRY_AND_USERNAME)/installer-base:$(IMAGE_TAG_IN) $(IMAGER_ARGS) ; \
-	done

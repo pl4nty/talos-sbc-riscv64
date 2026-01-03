@@ -1,9 +1,9 @@
-# syntax = ghcr.io/pl4nty/bldr:4b1d7bb
+# syntax = ghcr.io/pl4nty/bldr:8f5ebc8
 
 format: v1alpha2
 
 vars:
-  # renovate: datasource=github-tags extractVersion=^v(?<version>.*)$ depName=u-boot/u-boot
+  # renovate: datasource=github-tags extractVersion=^v(?<major>\\d+)\\.(?<minor>\\d+)(?-rc<prerelease>)?$ depName=u-boot/u-boot
   uboot_version: 2026.01-rc2
   uboot_sha256: 55a5e5783c1a0f0d5cfcd3a3529a81ccbc5ac182b3f6d25ac38dad9585329e31
   uboot_sha512: 404568a8ecf00145e154ee2856fb79a68ea9ce30466be12f8836ea6f6440f523abe438b78cb833a7be16865f5063a021be2aef778900a7c75952515788608010

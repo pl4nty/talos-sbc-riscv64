@@ -22,9 +22,72 @@ spec:
     ignoredPaths:
       - go.work.sum
 ---
-kind: common.Renovate
+kind: auto.CustomSteps
 spec:
-  packageRules:
-    - matchPackageNames:
-        - u-boot/u-boot
-      versioning: 'regex:^(?<major>\d+)\.(?<minor>\d+)\.?(?<patch>\d+)?$'
+  steps:
+    - name: image-%
+      toplevel: true
+    - name: images
+      toplevel: true
+---
+# https://github.com/siderolabs/talos/blob/85f7be6e3f14bf160cf32bccf7418b31968d474f/Makefile#L427
+# TODO --privileged?
+kind: custom.Step
+name: image-%
+spec:
+  makefile:
+    enabled: true
+    script:
+      - |
+        @docker pull $(REGISTRY_AND_USERNAME)/imager:$(IMAGE_TAG_IN)
+        @for platform in $(subst $(,),$(space),$(PLATFORM)); do \
+          arch=$$(basename "$${platform}") && \
+          docker run --rm -t \
+            --network=host \
+            -v $(PWD)/$(ARTIFACTS):/secureboot:ro \
+            -v $(PWD)/$(ARTIFACTS):/out \
+            -e GITHUB_TOKEN \
+            -e SOURCE_DATE_EPOCH=$(SOURCE_DATE_EPOCH) \
+            -e DETERMINISTIC_SEED=1 \
+            $(REGISTRY_AND_USERNAME)/imager:$(IMAGE_TAG_IN) $* \
+            --arch $$arch \
+            --base-installer-image $(REGISTRY_AND_USERNAME)/installer-base:$(IMAGE_TAG_IN) \
+            $(IMAGER_ARGS) ; \
+        done
+---
+kind: custom.Step
+name: images
+spec:
+  makefile:
+    enabled: true
+    script:
+      - |
+        @for profile in profiles/*/; do \
+          target=$$(basename "$${profile}") && \
+          $(MAKE) image-$$target IMAGER_ARGS="--overlay-name $$target --overlay-image $(REGISTRY_AND_USERNAME)/$(TARGETS):$(TAG)" ; \
+        done
+# doesn't merge with pkgfile.Build
+---
+kind: auto.CI
+spec:
+  compileGHWorkflowsOnly: false
+---
+kind: common.GHWorkflow
+spec:
+  jobs:
+    # Need GitHub runner for /dev/ptmx
+    - name: images
+      buildxOptions:
+        enabled: true
+      depends:
+      - default
+      runnerGroup: pkgs
+      steps:
+        - name: images
+          command: images
+        - name: save-artifacts
+          artifactStep:
+            type: upload
+            artifactName: talos-artifacts
+            disableExecutableListGeneration: true
+            artifactPath: _out/*.raw.*
