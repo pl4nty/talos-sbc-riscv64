@@ -54,6 +54,13 @@
             "matchFileNames": [
                 ".github/workflows/*.yaml"
             ]
+        },
+        {
+            "versioning": "regex:^(?<major>\\d+)\\.(?<minor>\\d+)\\.?(?<patch>\\d+)?(-rc)?(?<prerelease>\\d+)?$",
+            "matchPackageNames": [
+                "riscv-software-src/opensbi",
+                "u-boot/u-boot"
+            ]
         }
     ],
     "separateMajorMinor": false
