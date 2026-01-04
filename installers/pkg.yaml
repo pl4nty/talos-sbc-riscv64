@@ -4,14 +4,20 @@ shell: /bin/bash
 dependencies:
   - stage: licheepi-4a
   - stage: profiles
+  - stage: u-boot-jh7110
+    platform: linux/riscv64
   - stage: u-boot-licheepi-4a
     platform: linux/riscv64
+  - stage: u-boot-qemu
+    platform: linux/riscv64
+  - image: "{{ .BUILD_ARG_PKGS_PREFIX }}/kernel:{{ .BUILD_ARG_PKGS }}"
+    platform: linux/riscv64
+    from: /dtb/starfive/jh7110-milkv-marscm-lite.dtb
+    to: /rootfs/artifacts/riscv64/dtb/starfive/jh7110-milkv-marscm-lite.dtb
   - image: "{{ .BUILD_ARG_PKGS_PREFIX }}/kernel:{{ .BUILD_ARG_PKGS }}"
     platform: linux/riscv64
     from: /dtb/thead/th1520-lichee-pi-4a.dtb
     to: /rootfs/artifacts/riscv64/dtb/thead/th1520-lichee-pi-4a.dtb
-  - stage: u-boot-qemu
-    platform: linux/riscv64
 finalize:
   - from: /rootfs
     to: /
