@@ -4,17 +4,17 @@ format: v1alpha2
 
 vars:
   # renovate: datasource=github-tags extractVersion=^v(?<version>.*)$ depName=u-boot/u-boot
-  uboot_version: 2026.01-rc2
+  uboot_version: 2026.01
   uboot_sha256: 55a5e5783c1a0f0d5cfcd3a3529a81ccbc5ac182b3f6d25ac38dad9585329e31
   uboot_sha512: 404568a8ecf00145e154ee2856fb79a68ea9ce30466be12f8836ea6f6440f523abe438b78cb833a7be16865f5063a021be2aef778900a7c75952515788608010
 
   # renovate: datasource=github-tags extractVersion=^v(?<version>.*)$ depName=riscv-software-src/opensbi
-  opensbi_version: 1.7
+  opensbi_version: 1.8.1
   opensbi_sha256: 2cf856a4e5e2e052948ddb54ba48232b1f698b7f52e0374fc7d17d51e8c8f7ce
   opensbi_sha512: 2481c37ed912ef756089cfd39bb2b34417981ed273ff0365d0933e761619b481a8ce8bd88951a2a9cccef4bcb4a73c4aff63fd7bd5bbebc3e8cdcc1cd90a39a4
 
   # renovate: datasource=git-refs versioning=git depName=https://github.com/ziyao233/th1520-firmware.git
-  th1520_firmware_ref: a7595482097e5f852655cd537e65eb0325b81845
+  th1520_firmware_ref: db8df6cab3ff2a935eced5327b49a7465ec135d8
   th1520_firmware_sha256: 4009f25a333a81c70247344cd73d0bf7b5260d0e3ca23bebb45cb9b03341c3e8
   th1520_firmware_sha512: 9b48bb4c0fb33a3533ab890c447bdcaaa1e4d1bc255b0fa710a5114ed1e3bc4a1902e1400ab9a8e8215c95642ce525a2eb67db60f099ee8098e1d548b407b8ae
 labels:
