@@ -2,7 +2,10 @@
 #
 # Generated on 2026-09-06T12:12:44Z by kres 4b55d17.
 
-_out
-*.local.md
-*.override.md
-go.work.sum
+post-commit:
+  parallel: false
+  commands:
+    conformance:
+      run: make conformance
+      env:
+        USERNAME: pl4nty
