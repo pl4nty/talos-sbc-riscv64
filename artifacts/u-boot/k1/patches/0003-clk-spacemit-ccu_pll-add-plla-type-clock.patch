@@ -1,0 +1,258 @@
+From 69ddf02cc3cfbf6fbb4814fd6fcf8fcda0dca4ec Mon Sep 17 00:00:00 2001
+From: Yixun Lan <dlan@kernel.org>
+Date: Tue, 25 Aug 2026 04:24:13 +0000
+Subject: [PATCH 03/15] clk: spacemit: ccu_pll: add plla type clock
+
+Based on upstream Linux:
+  3a086236c600 ("clk: spacemit: ccu_pll: add plla type clock")
+
+Introduce a new clock PLLA for SpacemiT's K3 SoC which has a different
+register layout comparing to previous PPL type. And, It is configured
+by swcr1, swcr3 and swcr2 BIT[15:8].
+
+Signed-off-by: Yixun Lan <dlan@kernel.org>
+---
+ drivers/clk/spacemit/clk_common.h |   1 +
+ drivers/clk/spacemit/clk_pll.c    | 124 +++++++++++++++++++++++++++++-
+ drivers/clk/spacemit/clk_pll.h    |  43 ++++++++++-
+ 3 files changed, 163 insertions(+), 5 deletions(-)
+
+diff --git a/drivers/clk/spacemit/clk_common.h b/drivers/clk/spacemit/clk_common.h
+index ea5ebf57..60702414 100644
+--- a/drivers/clk/spacemit/clk_common.h
++++ b/drivers/clk/spacemit/clk_common.h
+@@ -36,6 +36,7 @@ struct ccu_common {
+ 		/* For PLL */
+ 		struct {
+ 			u32 reg_swcr1;
++			u32 reg_swcr2;
+ 			u32 reg_swcr3;
+ 		};
+ 	};
+diff --git a/drivers/clk/spacemit/clk_pll.c b/drivers/clk/spacemit/clk_pll.c
+index 56da70af..36de37c3 100644
+--- a/drivers/clk/spacemit/clk_pll.c
++++ b/drivers/clk/spacemit/clk_pll.c
+@@ -13,7 +13,8 @@
+ 
+ #include "clk_pll.h"
+ 
+-#define UBOOT_DM_SPACEMIT_CLK_PLL "spacemit_clk_pll"
++#define UBOOT_DM_SPACEMIT_CLK_PLL	"spacemit_clk_pll"
++#define UBOOT_DM_SPACEMIT_CLK_PLLA	"spacemit_clk_plla"
+ 
+ #define PLL_TIMEOUT_US		3000
+ #define PLL_DELAY_US		5
+@@ -21,6 +22,9 @@
+ #define PLL_SWCR3_EN		((u32)BIT(31))
+ #define PLL_SWCR3_MASK		GENMASK(30, 0)
+ 
++#define PLLA_SWCR2_EN		((u32)BIT(16))
++#define PLLA_SWCR2_MASK		GENMASK(15, 8)
++
+ static const struct ccu_pll_rate_tbl *ccu_pll_lookup_best_rate(struct ccu_pll *pll,
+ 							       unsigned long rate)
+ {
+@@ -155,3 +159,121 @@ U_BOOT_DRIVER(spacemit_clk_pll) = {
+ 	.ops	= &spacemit_clk_pll_ops,
+ 	.flags	= DM_FLAG_PRE_RELOC,
+ };
++
++static const struct ccu_pll_rate_tbl *ccu_plla_lookup_matched_entry(struct ccu_pll *pll)
++{
++	struct ccu_pll_config *config = &pll->config;
++	const struct ccu_pll_rate_tbl *entry;
++	u32 i, swcr1, swcr2, swcr3;
++
++	swcr1 = ccu_read(&pll->common, swcr1);
++	swcr2 = ccu_read(&pll->common, swcr2);
++	swcr2 &= PLLA_SWCR2_MASK;
++	swcr3 = ccu_read(&pll->common, swcr3);
++
++	for (i = 0; i < config->tbl_num; i++) {
++		entry = &config->rate_tbl[i];
++
++		if (swcr1 == entry->swcr1 &&
++		    swcr2 == entry->swcr2 &&
++		    swcr3 == entry->swcr3)
++			return entry;
++	}
++
++	return NULL;
++}
++
++static void ccu_plla_update_param(struct ccu_pll *pll, const struct ccu_pll_rate_tbl *entry)
++{
++	struct ccu_common *common = &pll->common;
++
++	regmap_write(common->regmap, common->reg_swcr1, entry->swcr1);
++	regmap_write(common->regmap, common->reg_swcr3, entry->swcr3);
++	ccu_update(common, swcr2, PLLA_SWCR2_MASK, entry->swcr2);
++}
++
++static int ccu_plla_enable(struct clk *clk)
++{
++	struct ccu_pll *pll = clk_to_ccu_pll(clk);
++	struct ccu_common *common = &pll->common;
++	unsigned int tmp;
++
++	ccu_update(common, swcr2, PLLA_SWCR2_EN, PLLA_SWCR2_EN);
++
++	/* check lock status */
++	return regmap_read_poll_timeout(common->lock_regmap,
++					pll->config.reg_lock,
++					tmp,
++					tmp & pll->config.mask_lock,
++					PLL_DELAY_US, PLL_TIMEOUT_US);
++}
++
++static int ccu_plla_disable(struct clk *clk)
++{
++	struct ccu_common *common = clk_to_ccu_common(clk);
++
++	ccu_update(common, swcr2, PLLA_SWCR2_EN, 0);
++
++	return 0;
++}
++
++/*
++ * PLLAs must be gated before changing rate, which is ensured by
++ * flag CLK_SET_RATE_GATE.
++ */
++static unsigned long ccu_plla_set_rate(struct clk *clk, unsigned long rate)
++{
++	struct ccu_pll *pll = clk_to_ccu_pll(clk);
++	const struct ccu_pll_rate_tbl *entry;
++
++	entry = ccu_pll_lookup_best_rate(pll, rate);
++	ccu_plla_update_param(pll, entry);
++
++	return 0;
++}
++
++static unsigned long ccu_plla_recalc_rate(struct clk *clk)
++{
++	struct ccu_pll *pll = clk_to_ccu_pll(clk);
++	const struct ccu_pll_rate_tbl *entry;
++
++	entry = ccu_plla_lookup_matched_entry(pll);
++
++	WARN_ON_ONCE(!entry);
++
++	return entry ? entry->rate : 0;
++}
++
++static const struct clk_ops spacemit_clk_plla_ops = {
++	.enable = ccu_plla_enable,
++	.disable = ccu_plla_disable,
++	.set_rate = ccu_plla_set_rate,
++	.get_rate = ccu_plla_recalc_rate,
++};
++
++int spacemit_plla_init(struct ccu_common *common)
++{
++	struct clk *clk = &common->clk;
++	struct ccu_pll *pll = clk_to_ccu_pll(clk);
++	int ret;
++
++	ret = clk_register(clk, UBOOT_DM_SPACEMIT_CLK_PLLA,
++			   common->name, common->parents[0]);
++	if (ret)
++		return ret;
++
++	if (ccu_plla_lookup_matched_entry(pll))
++		return 0;
++
++	ccu_plla_disable(clk);
++	ccu_plla_update_param(pll, &pll->config.rate_tbl[0]);
++
++	return 0;
++}
++
++U_BOOT_DRIVER(spacemit_clk_plla) = {
++	.name	= UBOOT_DM_SPACEMIT_CLK_PLLA,
++	.id	= UCLASS_CLK,
++	.ops	= &spacemit_clk_plla_ops,
++	.flags	= DM_FLAG_PRE_RELOC,
++};
+diff --git a/drivers/clk/spacemit/clk_pll.h b/drivers/clk/spacemit/clk_pll.h
+index 3987cc11..0de027dc 100644
+--- a/drivers/clk/spacemit/clk_pll.h
++++ b/drivers/clk/spacemit/clk_pll.h
+@@ -20,14 +20,28 @@
+  * configuration.
+  *
+  * @rate:	PLL rate
+- * @swcr1:	Register value of PLLX_SW1_CTRL (PLLx_SWCR1).
+- * @swcr3:	Register value of the PLLx_SW3_CTRL's lowest 31 bits of
+- *		PLLx_SW3_CTRL (PLLx_SWCR3). This highest bit is for enabling
+- *		the PLL and not contained in this field.
++ * @swcr1:	Value of register PLLx_SW1_CTRL.
++ * @swcr2:	Value of register PLLAx_SW2_CTRL (PLLA only).
++ * @swcr3:	Value of register PLLx_SW3_CTRL.
++ *
++ * Regular PLL type
++ *  | Enable | swcr3 | PLLx_SW3_CTRL - BIT[31]    |
++ *  -----------------------------------------------
++ *  | Config | swcr1 | PLLx_SW1_CTRL - BIT[31:0]  |
++ *  |        | swcr2 | Not used                   |
++ *  |        | swcr3 | PLLx_SW3_CTRL - BIT[30:0]  |
++ *
++ * Special PLL type A
++ *  | Enable | swcr2 | PLLAx_SW2_CTRL - BIT[16]   |
++ *  -----------------------------------------------
++ *  | Config | swcr1 | PLLAx_SW1_CTRL - BIT[31:0] |
++ *  |        | swcr2 | PLLAx_SW2_CTRL - BIT[15:8] |
++ *  |        | swcr3 | PLLAx_SW3_CTRL - BIT[31:0] |
+  */
+ struct ccu_pll_rate_tbl {
+ 	unsigned long rate;
+ 	u32 swcr1;
++	u32 swcr2;
+ 	u32 swcr3;
+ };
+ 
+@@ -38,6 +52,14 @@ struct ccu_pll_rate_tbl {
+ 		.swcr3	= _swcr3,		\
+ 	}
+ 
++#define CCU_PLLA_RATE(_rate, _swcr1, _swcr2, _swcr3)	\
++	{						\
++		.rate	= _rate,			\
++		.swcr1	= _swcr1,			\
++		.swcr2	= _swcr2,			\
++		.swcr3	= _swcr3,			\
++	}
++
+ struct ccu_pll_config {
+ 	const struct ccu_pll_rate_tbl *rate_tbl;
+ 	u32 tbl_num;
+@@ -69,6 +91,18 @@ static struct ccu_pll _var = {							\
+ 	}									\
+ }
+ 
++#define CCU_PLLA_DEFINE(_id, _var, _name, _parent, _table, _reg_swcr1,		\
++			_reg_swcr2, _reg_swcr3, _reg_lock, _mask_lock, _flags)	\
++static struct ccu_pll _var = {							\
++	.config	= CCU_PLL_CONFIG(_table, _reg_lock, _mask_lock),		\
++	.common = {								\
++		.reg_swcr1	= _reg_swcr1,					\
++		.reg_swcr2	= _reg_swcr2,					\
++		.reg_swcr3	= _reg_swcr3,					\
++		CCU_COMMON(_id, _name, _parent, spacemit_plla_init, _flags)	\
++	}									\
++}
++
+ static inline struct ccu_pll *clk_to_ccu_pll(struct clk *clk)
+ {
+ 	struct ccu_common *common = clk_to_ccu_common(clk);
+@@ -77,5 +111,6 @@ static inline struct ccu_pll *clk_to_ccu_pll(struct clk *clk)
+ }
+ 
+ int spacemit_pll_init(struct ccu_common *common);
++int spacemit_plla_init(struct ccu_common *common);
+ 
+ #endif /* _CLK_PLL_H_ */
+-- 
+2.52.0
+

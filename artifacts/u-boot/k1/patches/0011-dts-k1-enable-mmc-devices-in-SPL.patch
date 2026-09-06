@@ -1,0 +1,246 @@
+From 88f78813065d4288861c22ee4432c43f30e98615 Mon Sep 17 00:00:00 2001
+From: Eric Chung <eric.chung@riscstar.com>
+Date: Sun, 6 Sep 2026 17:11:05 +0800
+Subject: [PATCH 11/15] dts: k1: enable mmc devices in SPL
+
+Enable eMMC and SD device nodes in SPL stage. And set the
+bus frequency for mmc device nodes.
+
+Remove the redundant device nodes that are delcared in upstream
+DTS files.
+
+Signed-off-by: Eric Chung <eric.chung@riscstar.com>
+---
+ arch/riscv/dts/k1-bananapi-f3-u-boot.dtsi |  12 +-
+ arch/riscv/dts/k1-musepi-pro-u-boot.dtsi  | 136 ++--------------------
+ 2 files changed, 21 insertions(+), 127 deletions(-)
+
+diff --git a/arch/riscv/dts/k1-bananapi-f3-u-boot.dtsi b/arch/riscv/dts/k1-bananapi-f3-u-boot.dtsi
+index 7f9443d6..3077cdee 100644
+--- a/arch/riscv/dts/k1-bananapi-f3-u-boot.dtsi
++++ b/arch/riscv/dts/k1-bananapi-f3-u-boot.dtsi
+@@ -50,7 +50,6 @@
+ 
+ &i2c2 {
+ 	bootph-pre-ram;
+-	resets = <&syscon_apbc RESET_TWSI2>;
+ 
+ 	eeprom@50 {
+ 		bootph-pre-ram;
+@@ -65,7 +64,6 @@
+  */
+ &i2c8 {
+ 	bootph-pre-ram;
+-	resets = <&syscon_apbc RESET_TWSI8>;
+ 
+ 	pmic@41 {
+ 		bootph-pre-ram;
+@@ -89,6 +87,16 @@
+ 	};
+ };
+ 
++&emmc {
++	bootph-pre-ram;
++	max-frequency = <204800000>;
++};
++
++&sdhci0 {
++	bootph-pre-ram;
++	max-frequency = <204800000>;
++};
++
+ &binman {
+ 	u-boot-spl-ddr {
+ 		type = "section";
+diff --git a/arch/riscv/dts/k1-musepi-pro-u-boot.dtsi b/arch/riscv/dts/k1-musepi-pro-u-boot.dtsi
+index 8a9a2a09..d6299c96 100644
+--- a/arch/riscv/dts/k1-musepi-pro-u-boot.dtsi
++++ b/arch/riscv/dts/k1-musepi-pro-u-boot.dtsi
+@@ -76,42 +76,15 @@
+ 
+ &i2c2 {
+ 	bootph-pre-ram;
+-	status = "okay";
+-	pinctrl-0 = <&i2c2_0_cfg>;
+-	pinctrl-names = "default";
+-	resets = <&syscon_apbc RESET_TWSI2>;
+ 
+ 	eeprom@50 {
+ 		bootph-pre-ram;
+ 		status = "okay";
+-		compatible = "atmel,24c02";
+-		reg = <0x50>;
+-		vcc-supply = <&buck3_1v8>; /* EEPROM_VCC1V8 */
+-		pagesize = <16>;
+-		read-only;
+-		size = <256>;
+-
+-		nvmem-layout {
+-			compatible = "onie,tlv-layout";
+-
+-			mac-address {
+-				#nvmem-cell-cells = <1>;
+-			};
+-
+-			num-macs {
+-			};
+-
+-			serial-number {
+-			};
+-		};
+ 	};
+ };
+ 
+ &i2c8 {
+ 	bootph-pre-ram;
+-	pinctrl-0 = <&i2c8_cfg>;
+-	pinctrl-names = "default";
+-	resets = <&syscon_apbc RESET_TWSI8>;
+ 	status = "okay";
+ 
+ 	pmic@41 {
+@@ -125,130 +98,43 @@
+ 			buck1 {
+ 				bootph-pre-ram;
+ 				regulator-name = "vdd_core";
+-				regulator-min-microvolt = <500000>;
+-				regulator-max-microvolt = <3450000>;
+-				regulator-ramp-delay = <5000>;
+-				regulator-always-on;
+-			};
+-
+-			buck2 {
+-				regulator-min-microvolt = <500000>;
+-				regulator-max-microvolt = <3450000>;
+-				regulator-ramp-delay = <5000>;
+-				regulator-always-on;
+ 			};
+ 
+ 			buck3_1v8: buck3 {
+ 				bootph-pre-ram;
+ 				regulator-name = "vdd_1v8";
+-				regulator-min-microvolt = <500000>;
+-				regulator-max-microvolt = <1800000>;
+-				regulator-ramp-delay = <5000>;
+-				regulator-always-on;
+-			};
+-
+-			buck4 {
+-				regulator-min-microvolt = <500000>;
+-				regulator-max-microvolt = <3300000>;
+-				regulator-ramp-delay = <5000>;
+-				regulator-always-on;
+-			};
+-
+-			buck5 {
+-				regulator-min-microvolt = <500000>;
+-				regulator-max-microvolt = <3450000>;
+-				regulator-ramp-delay = <5000>;
+-				regulator-always-on;
+-			};
+-
+-			buck6 {
+-				regulator-min-microvolt = <500000>;
+-				regulator-max-microvolt = <3450000>;
+-				regulator-ramp-delay = <5000>;
+-				regulator-always-on;
+ 			};
+ 
+ 			aldo1 {
+ 				bootph-pre-ram;
+ 				regulator-name = "vdd_1v8_mmc";
+-				regulator-min-microvolt = <500000>;
+-				regulator-max-microvolt = <3400000>;
+-				regulator-boot-on;
+-			};
+-
+-			aldo2 {
+-				regulator-min-microvolt = <500000>;
+-				regulator-max-microvolt = <3400000>;
+-			};
+-
+-			aldo3 {
+-				regulator-min-microvolt = <500000>;
+-				regulator-max-microvolt = <3400000>;
+ 			};
+ 
+-			aldo4 {
+-				regulator-min-microvolt = <500000>;
+-				regulator-max-microvolt = <3400000>;
+-			};
+-
+-			dldo1 {
+-				regulator-min-microvolt = <500000>;
+-				regulator-max-microvolt = <3400000>;
+-				regulator-boot-on;
+-			};
+-
+-			dldo2 {
+-				regulator-min-microvolt = <500000>;
+-				regulator-max-microvolt = <3400000>;
+-			};
+-
+-			dldo3 {
+-				regulator-min-microvolt = <500000>;
+-				regulator-max-microvolt = <3400000>;
+-			};
+-
+-			dldo4 {
+-				regulator-min-microvolt = <500000>;
+-				regulator-max-microvolt = <3400000>;
+-				regulator-always-on;
+-			};
+-
+-			dldo5 {
+-				regulator-min-microvolt = <500000>;
+-				regulator-max-microvolt = <3400000>;
+-			};
+-
+-			dldo6 {
+-				regulator-min-microvolt = <500000>;
+-				regulator-max-microvolt = <3400000>;
+-				regulator-always-on;
+-			};
+-
+-			dldo7 {
+-				regulator-min-microvolt = <500000>;
+-				regulator-max-microvolt = <3400000>;
+-			};
+ 		};
+ 	};
+ };
+ 
+ &qspi {
+ 	bootph-pre-ram;
+-	pinctrl-names = "default";
+-	pinctrl-0 = <&qspi_cfg>;
+ 	status = "okay";
+ 
+ 	flash@0 {
+ 		bootph-pre-ram;
+-		compatible = "jedec,spi-nor";
+-		reg = <0>;
+-		spi-max-frequency = <26500000>;
+-		m25p,fast-read;
+-		broken-flash-reset;
+ 		status = "okay";
+ 	};
+ };
+ 
++&emmc {
++	bootph-pre-ram;
++	max-frequency = <204800000>;
++};
++
++&sdhci0 {
++	bootph-pre-ram;
++	cd-gpios = <&gpio K1_GPIO(80) (GPIO_ACTIVE_LOW | GPIO_PULL_UP)>;
++	max-frequency = <204800000>;
++};
++
+ &binman {
+ 	u-boot-spl-ddr {
+ 		type = "section";
+-- 
+2.52.0
+

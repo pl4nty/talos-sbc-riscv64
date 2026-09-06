@@ -13,6 +13,16 @@ vars:
   opensbi_sha256: f6c4985843d6d878b5b511d7d7a930b6b541d3d9305371f2d9780765428f66f4
   opensbi_sha512: dbefd522516a63fae91a0ddad13a5230e65888f4171361ebc8d84d21649ea2000a96e3cbd5f862a91962c92e254d27b62ee2ffd27f33ae8fc88a6f0cb93e37d6
 
+  # renovate: datasource=git-refs versioning=git depName=https://github.com/u-boot/u-boot.git
+  uboot_next_version: next
+  uboot_next_ref: 75df64103873fac09642860cedadaffb8cf6b2c7
+  uboot_next_sha256: 0ec8ce407f2c5beb7bf7402eec2c8216095afd575d771b896de89dc868fdb062
+  uboot_next_sha512: c05d56e35b58ea47d80c7a2efef9c78405fb87dd18c752712ce88e7fdcdd5f8ceff02743ba0b37b1489af93f5414646e9ee75c606504d162cc98111a6c2b34e2
+
+  # renovate: datasource=git-refs versioning=git depName=https://github.com/spacemit-com/uboot-2022.10.git
+  spacemit_uboot_ref: 1fa1ca64e9705a3650bcc7c21f6666949290830f
+  spacemit_uboot_sha256: 0ca6bf5c4c457698be276ecf7cff118fa2f16bbb301312641f0d5825e7c4b038
+  spacemit_uboot_sha512: cac06b2a313be4f9bca1f40c5a3c22c5d26f56a8a1eb76b838f7dd13228e1fbf9e7cbf8d045b83b6e58584ef3223b03119f71ff98a59b52dad82598671df166b
 
   # renovate: datasource=git-refs versioning=git depName=https://github.com/spacemit-com/spacemit-firmware.git
   spacemit_firmware_ref: 5969642a5b46fee5ba7f21ca54c3129bff7bb049

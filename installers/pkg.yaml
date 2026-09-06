@@ -6,6 +6,8 @@ dependencies:
   - stage: licheepi-3a
   - stage: licheepi-4a
   - stage: profiles
+  - stage: fsbl-k1
+    platform: linux/riscv64
   - stage: u-boot-jh7110
     platform: linux/riscv64
   - stage: u-boot-k1

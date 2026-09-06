@@ -20,6 +20,11 @@ steps:
         tar xf u-boot.tar.gz --strip-components=1
       - |
         make starfive_visionfive2_defconfig
+      - |
+        # mkeficapsule needs gnutls with PKCS#11, which the tools image doesn't
+        # carry, and nothing here builds EFI capsules.
+        ./scripts/config --disable TOOLS_MKEFICAPSULE
+        make olddefconfig
     build:
       - |
         make -j $(nproc) HOSTLDLIBS_mkimage="-lssl -lcrypto" OPENSBI=/rootfs/artifacts/riscv64/opensbi/fw_dynamic.bin

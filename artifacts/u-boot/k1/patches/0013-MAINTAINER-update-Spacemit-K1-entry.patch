@@ -1,0 +1,37 @@
+From c419fff4fc76956e43558257f8191fe79a0f2f9d Mon Sep 17 00:00:00 2001
+From: Eric Chung <eric.chung@riscstar.com>
+Date: Sun, 6 Sep 2026 17:11:07 +0800
+Subject: [PATCH 13/15] MAINTAINER: update Spacemit K1 entry
+
+Update the maintainer for Spacemit K1 from Guodong to Eric.
+
+Add mmc driver to maintained files.
+
+Signed-off-by: Eric Chung <eric.chung@riscstar.com>
+---
+ board/spacemit/k1/MAINTAINERS | 3 ++-
+ 1 file changed, 2 insertions(+), 1 deletion(-)
+
+diff --git a/board/spacemit/k1/MAINTAINERS b/board/spacemit/k1/MAINTAINERS
+index 32d47ecc..4b2bc4ec 100644
+--- a/board/spacemit/k1/MAINTAINERS
++++ b/board/spacemit/k1/MAINTAINERS
+@@ -1,6 +1,6 @@
+ BananaPi F3
+ M:	Huan Zhou <pericycle.cc@gmail.com>
+-M:	Guodong Xu <guodong.xu@riscstar.com>
++M:	Eric Chung <eric.chung@riscstar.com>
+ L:	u-boot-spacemit@groups.io
+ S:	Maintained
+ F:	arch/riscv/dts/k1-*-u-boot.dtsi
+@@ -9,6 +9,7 @@ F:	configs/spacemit_k1_defconfig
+ F:	doc/board/spacemit/bananapi-f3.rst
+ F:	drivers/gpio/spacemit_gpio.c
+ F:	drivers/i2c/k1_i2c.c
++F:	drivers/mmc/spacemit_sdhci.c
+ F:	drivers/pinctrl/spacemit/
+ F:	drivers/power/pmic/pmic_spacemit_p1.c
+ F:	drivers/power/regulator/spacemit_p1_regulator.c
+-- 
+2.52.0
+

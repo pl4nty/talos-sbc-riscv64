@@ -1,0 +1,98 @@
+From 60bdaa8167cb92b869aa3953e69a488feefcc89a Mon Sep 17 00:00:00 2001
+From: Yixun Lan <dlan@kernel.org>
+Date: Tue, 25 Aug 2026 04:24:12 +0000
+Subject: [PATCH 02/15] clk: spacemit: ccu_mix: add inverted enable gate clock
+
+Based on upstream linux:
+  ace73b7e2763 ("clk: spacemit: ccu_mix: add inverted enable gate clock")
+
+K3 SoC has the clock IP which support to write value 0 for enabling the
+clock, while write 1 for disabling it, thus the enable BIT is inverted.
+So, introduce a flag to support the inverted gate clock.
+
+Signed-off-by: Yixun Lan <dlan@kernel.org>
+---
+ drivers/clk/spacemit/clk_mix.c |  7 +++++--
+ drivers/clk/spacemit/clk_mix.h | 17 +++++++++++++----
+ 2 files changed, 18 insertions(+), 6 deletions(-)
+
+diff --git a/drivers/clk/spacemit/clk_mix.c b/drivers/clk/spacemit/clk_mix.c
+index 45bf2c72..b0d1a506 100644
+--- a/drivers/clk/spacemit/clk_mix.c
++++ b/drivers/clk/spacemit/clk_mix.c
+@@ -33,8 +33,10 @@
+ int ccu_gate_disable(struct clk *clk)
+ {
+ 	struct ccu_mix *mix = clk_to_ccu_mix(clk);
++	struct ccu_gate_config *gate = &mix->gate;
++	u32 val = gate->inverted ? gate->mask : 0;
+ 
+-	ccu_update(&mix->common, ctrl, mix->gate.mask, 0);
++	ccu_update(&mix->common, ctrl, gate->mask, val);
+ 
+ 	return 0;
+ }
+@@ -43,8 +45,9 @@ int ccu_gate_enable(struct clk *clk)
+ {
+ 	struct ccu_mix *mix = clk_to_ccu_mix(clk);
+ 	struct ccu_gate_config *gate = &mix->gate;
++	u32 val = gate->inverted ? 0 : gate->mask;
+ 
+-	ccu_update(&mix->common, ctrl, gate->mask, gate->mask);
++	ccu_update(&mix->common, ctrl, gate->mask, val);
+ 
+ 	return 0;
+ }
+diff --git a/drivers/clk/spacemit/clk_mix.h b/drivers/clk/spacemit/clk_mix.h
+index 26a12ced..4ac61b55 100644
+--- a/drivers/clk/spacemit/clk_mix.h
++++ b/drivers/clk/spacemit/clk_mix.h
+@@ -20,9 +20,11 @@
+  *
+  * @mask:	Mask to enable the gate. Some clocks may have more than one bit
+  *		set in this field.
++ * @inverted:	Enable bit is inverted, 1 - disable clock, 0 - enable clock
+  */
+ struct ccu_gate_config {
+ 	u32 mask;
++	bool inverted;
+ };
+ 
+ struct ccu_factor_config {
+@@ -48,15 +50,17 @@ struct ccu_mix {
+ 	struct ccu_common common;
+ };
+ 
+-#define CCU_GATE_INIT(_mask)		{ .mask = _mask }
++#define CCU_GATE_INIT(_mask)		{ .mask = _mask, .inverted = false }
++#define CCU_GATE_FLAGS_INIT(_mask, _inverted)	\
++	{ .mask = _mask, .inverted = _inverted }
+ #define CCU_FACTOR_INIT(_div, _mul)	{ .div = _div, .mul = _mul }
+ #define CCU_MUX_INIT(_shift, _width)	{ .shift = _shift, .width = _width }
+ #define CCU_DIV_INIT(_shift, _width)	{ .shift = _shift, .width = _width }
+ 
+-#define CCU_GATE_DEFINE(_id, _var, _name, _parent, _reg_ctrl,		\
+-			_mask_gate, _flags)				\
++#define CCU_GATE_FLAGS_DEFINE(_id, _var, _name, _parent, _reg_ctrl,	\
++			      _mask_gate, _inverted, _flags)		\
+ static struct ccu_mix _var = {						\
+-	.gate	= CCU_GATE_INIT(_mask_gate),				\
++	.gate	= CCU_GATE_FLAGS_INIT(_mask_gate, _inverted),		\
+ 	.common	= {							\
+ 		.reg_ctrl	= _reg_ctrl,				\
+ 		CCU_COMMON(_id, _name, _parent, spacemit_gate_init,	\
+@@ -64,6 +68,11 @@ static struct ccu_mix _var = {						\
+ 	}								\
+ }
+ 
++#define CCU_GATE_DEFINE(_id, _var, _name, _parent, _reg_ctrl,		\
++			_mask_gate, _flags)				\
++	CCU_GATE_FLAGS_DEFINE(_id, _var, _name, _parent, _reg_ctrl,	\
++			      _mask_gate, false, _flags)
++
+ #define CCU_FACTOR_DEFINE(_id, _var, _name, _parent, _div, _mul)	\
+ static struct ccu_mix _var = {						\
+ 	.factor	= CCU_FACTOR_INIT(_div, _mul),				\
+-- 
+2.52.0
+

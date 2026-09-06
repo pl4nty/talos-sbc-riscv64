@@ -1,0 +1,51 @@
+# The K1 boot ROM won't accept a bare SPL - it expects an FSBL: an AIHD-header
+# container carrying the SPL, RSA2048 public keys and SHA256+RSA2048 signatures.
+# tools/build_binary_file.py from SpacemiT's vendor U-Boot assembles it from a
+# JSON descriptor, shelling out to openssl for the RSA work.
+#
+# The keys are SpacemiT's published development keys, which ship in the vendor
+# tree. The headers set secure=0, so on a non-secure-boot part the signature is a
+# format requirement rather than a trust boundary - this produces an image the
+# boot ROM accepts, not a secure-boot chain. A board with eFuses burnt for secure
+# boot needs the operator's own keys.
+#
+# https://docs.u-boot.org/en/latest/board/spacemit/k1-spl.html
+name: fsbl-k1
+variant: scratch
+shell: /bin/bash
+dependencies:
+  - stage: base
+  - stage: u-boot-k1
+steps:
+  - sources:
+      - url: https://github.com/spacemit-com/uboot-2022.10/archive/{{ .spacemit_uboot_ref }}.tar.gz
+        destination: vendor-uboot.tar.gz
+        sha256: "{{ .spacemit_uboot_sha256 }}"
+        sha512: "{{ .spacemit_uboot_sha512 }}"
+    env:
+      SOURCE_DATE_EPOCH: {{ .BUILD_ARG_SOURCE_DATE_EPOCH }}
+    prepare:
+      - |
+        tar xf vendor-uboot.tar.gz --strip-components=1
+      - |
+        cd board/spacemit/k1-x/configs
+        # fsbl.json wraps u-boot-spl.bin; we want the binman image that has the
+        # DDR firmware packed alongside it.
+        cp fsbl.json fsbl_ddr.json
+        sed -i 's/u-boot-spl\.bin/u-boot-spl-ddr.bin/g' fsbl_ddr.json
+      - |
+        # "source" paths in the descriptor resolve relative to the JSON's parent
+        # directory, so stage the SPL one level above configs/.
+        cp /rootfs/artifacts/riscv64/u-boot/k1/u-boot-spl-ddr.bin board/spacemit/k1-x/
+    build:
+      - |
+        python3 tools/build_binary_file.py \
+          -c board/spacemit/k1-x/configs/fsbl_ddr.json \
+          -o FSBL.bin
+    install:
+      - |
+        mkdir -p /rootfs/artifacts/riscv64/fsbl/k1
+        cp -v FSBL.bin /rootfs/artifacts/riscv64/fsbl/k1
+finalize:
+  - from: /rootfs
+    to: /rootfs

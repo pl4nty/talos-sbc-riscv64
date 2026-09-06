@@ -28,6 +28,11 @@ steps:
         cp /rootfs/artifacts/riscv64/th1520-firmware/* .
       - |
         make th1520_lpi4a_defconfig
+      - |
+        # mkeficapsule needs gnutls with PKCS#11, which the tools image doesn't
+        # carry, and nothing here builds EFI capsules.
+        ./scripts/config --disable TOOLS_MKEFICAPSULE
+        make olddefconfig
     build:
       - |
         make -j $(nproc) HOSTLDLIBS_mkimage="-lssl -lcrypto" OPENSBI=/rootfs/artifacts/riscv64/opensbi/fw_dynamic.bin
