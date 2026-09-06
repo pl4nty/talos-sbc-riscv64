@@ -5,17 +5,17 @@ format: v1alpha2
 vars:
   # renovate: datasource=github-tags extractVersion=^v(?<version>.*)$ depName=u-boot/u-boot
   uboot_version: 2026.07
-  uboot_sha256: 55a5e5783c1a0f0d5cfcd3a3529a81ccbc5ac182b3f6d25ac38dad9585329e31
-  uboot_sha512: 404568a8ecf00145e154ee2856fb79a68ea9ce30466be12f8836ea6f6440f523abe438b78cb833a7be16865f5063a021be2aef778900a7c75952515788608010
+  uboot_sha256: 78e8bfc382fe388f9b55aa1daf8c563522a037779b5d4c349d1415e381f1243e
+  uboot_sha512: 1292e1c15b75fde569efd1f983aa38e8db2e8b10b19de964886c4e80988922263bb862f5eb3b39f2051c5b28f43958f40b1f0e5c036de7fd862dc30b603cde5d
 
   # renovate: datasource=github-tags extractVersion=^v(?<version>.*)$ depName=riscv-software-src/opensbi
   opensbi_version: 1.9
-  opensbi_sha256: 2cf856a4e5e2e052948ddb54ba48232b1f698b7f52e0374fc7d17d51e8c8f7ce
-  opensbi_sha512: 2481c37ed912ef756089cfd39bb2b34417981ed273ff0365d0933e761619b481a8ce8bd88951a2a9cccef4bcb4a73c4aff63fd7bd5bbebc3e8cdcc1cd90a39a4
+  opensbi_sha256: f6c4985843d6d878b5b511d7d7a930b6b541d3d9305371f2d9780765428f66f4
+  opensbi_sha512: dbefd522516a63fae91a0ddad13a5230e65888f4171361ebc8d84d21649ea2000a96e3cbd5f862a91962c92e254d27b62ee2ffd27f33ae8fc88a6f0cb93e37d6
 
   # renovate: datasource=git-refs versioning=git depName=https://github.com/ziyao233/th1520-firmware.git
   th1520_firmware_ref: 672c4441a8487bd1fcc8a8ae36824586c007625a
-  th1520_firmware_sha256: 4009f25a333a81c70247344cd73d0bf7b5260d0e3ca23bebb45cb9b03341c3e8
-  th1520_firmware_sha512: 9b48bb4c0fb33a3533ab890c447bdcaaa1e4d1bc255b0fa710a5114ed1e3bc4a1902e1400ab9a8e8215c95642ce525a2eb67db60f099ee8098e1d548b407b8ae
+  th1520_firmware_sha256: bafcd0cd6e3d1304f88a9536434b6e4e0d3d52ae6bc484099dac83709d23ac87
+  th1520_firmware_sha512: 6be5b4de62954bacd76afa0d44e0a3fe05b1e81be21dfa563725aeb0a8eb230881ebc12723437ba762c9518ecbcf08912bad68df5be43c97917953e1ec984f85
 labels:
   org.opencontainers.image.source: https://github.com/pl4nty/talos-sbc-riscv64
