@@ -4,14 +4,20 @@ format: v1alpha2
 
 vars:
   # renovate: datasource=github-tags extractVersion=^v(?<version>.*)$ depName=u-boot/u-boot
-  uboot_version: 2026.07
-  uboot_sha256: 78e8bfc382fe388f9b55aa1daf8c563522a037779b5d4c349d1415e381f1243e
-  uboot_sha512: 1292e1c15b75fde569efd1f983aa38e8db2e8b10b19de964886c4e80988922263bb862f5eb3b39f2051c5b28f43958f40b1f0e5c036de7fd862dc30b603cde5d
+  uboot_version: 2026.10-rc3
+  uboot_sha256: 36a1c84499212353fffbe6069ed9d0551fa269e62d0d4e0fbccc7e1f82c7c9f3
+  uboot_sha512: 6a3e5e59b01d7872222831a536a513090578aa2544f557c5791a2408596365d42c106f0b9a654b0b0cca00257019bc48b8b2ac2ff5635e885c2629bfdb4204d4
 
   # renovate: datasource=github-tags extractVersion=^v(?<version>.*)$ depName=riscv-software-src/opensbi
   opensbi_version: 1.9
   opensbi_sha256: f6c4985843d6d878b5b511d7d7a930b6b541d3d9305371f2d9780765428f66f4
   opensbi_sha512: dbefd522516a63fae91a0ddad13a5230e65888f4171361ebc8d84d21649ea2000a96e3cbd5f862a91962c92e254d27b62ee2ffd27f33ae8fc88a6f0cb93e37d6
+
+
+  # renovate: datasource=git-refs versioning=git depName=https://github.com/spacemit-com/spacemit-firmware.git
+  spacemit_firmware_ref: 5969642a5b46fee5ba7f21ca54c3129bff7bb049
+  spacemit_firmware_sha256: 0b500f11acabd1522d339249a302cb476fde0b00c2916d2bec7319d1257a5a50
+  spacemit_firmware_sha512: fe863ed51ad2c65d988af1ac99235424b9d54a2a8bf4e8588abc0b72e10388e9fffa68356a2dbbb0ec72d5fe8e708da9a675411043ea16e1876fadd3376385e9
 
   # renovate: datasource=git-refs versioning=git depName=https://github.com/ziyao233/th1520-firmware.git
   th1520_firmware_ref: 672c4441a8487bd1fcc8a8ae36824586c007625a

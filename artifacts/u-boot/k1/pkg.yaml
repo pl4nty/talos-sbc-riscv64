@@ -1,0 +1,47 @@
+# References:
+#   U-Boot:
+#     - https://u-boot.readthedocs.io/en/latest
+#     - https://docs.u-boot.org/en/latest/board/spacemit/k1-spl.html
+#
+# spacemit_k1_defconfig and board/spacemit/k1 arrived after 2026.07, replacing
+# the bananapi-f3 target, so this needs the 2026.10 RC that Pkgfile pins.
+#
+# This is an M-mode SPL that initialises DDR and chain-loads OpenSBI (packed at
+# 0x0, matching the generic OpenSBI default FW_TEXT_START) plus S-mode U-Boot
+# from SPI NOR. The SPL image still has to be signed into an FSBL with SpacemiT's
+# vendor tooling before the boot ROM will accept it - see the guide above.
+#
+# CONFIG_OF_LIST covers the BPI-F3 and MusePi Pro; there's no LicheePi 3A DT
+# upstream, so that board needs its fdt supplied some other way.
+name: u-boot-k1
+variant: scratch
+shell: /bin/bash
+dependencies:
+  - stage: base
+  - stage: opensbi
+  - stage: spacemit-firmware-k1
+steps:
+  - sources:
+      - url: https://github.com/u-boot/u-boot/archive/refs/tags/v{{ .uboot_version }}.tar.gz
+        destination: u-boot.tar.gz
+        sha256: "{{ .uboot_sha256 }}"
+        sha512: "{{ .uboot_sha512 }}"
+    env:
+      SOURCE_DATE_EPOCH: {{ .BUILD_ARG_SOURCE_DATE_EPOCH }}
+    prepare:
+      - |
+        tar xf u-boot.tar.gz --strip-components=1
+      - |
+        make spacemit_k1_defconfig
+    build:
+      - |
+        make -j $(nproc) HOSTLDLIBS_mkimage="-lssl -lcrypto" \
+          DDR_FW_FILE=/rootfs/artifacts/riscv64/spacemit-firmware/k1/ddr_fw.bin \
+          OPENSBI=/rootfs/artifacts/riscv64/opensbi/fw_dynamic.bin
+    install:
+      - |
+        mkdir -p /rootfs/artifacts/riscv64/u-boot/k1
+        cp -v u-boot* /rootfs/artifacts/riscv64/u-boot/k1
+finalize:
+  - from: /rootfs
+    to: /rootfs

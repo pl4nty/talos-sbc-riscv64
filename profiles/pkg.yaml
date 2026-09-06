@@ -1,5 +1,9 @@
 name: profiles
 variant: scratch
 finalize:
+  - from: /pkg/k3-pico-itx
+    to: /rootfs/profiles
+  - from: /pkg/licheepi-3a
+    to: /rootfs/profiles
   - from: /pkg/licheepi-4a
     to: /rootfs/profiles

@@ -2,4 +2,8 @@ go 1.26.5
 
 toolchain go1.27.1
 
-use ./installers/licheepi-4a/src
+use (
+	./installers/k3-pico-itx/src
+	./installers/licheepi-3a/src
+	./installers/licheepi-4a/src
+)

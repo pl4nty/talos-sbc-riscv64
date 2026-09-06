@@ -5,6 +5,7 @@
 package main
 
 import (
+	"context"
 	_ "embed"
 	"fmt"
 	"os"
@@ -17,14 +18,14 @@ import (
 )
 
 func main() {
-	adapter.Execute(&licheePi4AInstaller{})
+	adapter.Execute(context.Background(), &licheePi4AInstaller{})
 }
 
 type licheePi4AInstaller struct{}
 
 type licheePi4AExtraOptions struct{}
 
-func (i *licheePi4AInstaller) GetOptions(extra licheePi4AExtraOptions) (overlay.Options, error) {
+func (i *licheePi4AInstaller) GetOptions(ctx context.Context, extra licheePi4AExtraOptions) (overlay.Options, error) {
 	kernelArgs := []string{
 		"console=tty0",
 		"console=ttyS0,115200",
@@ -38,7 +39,7 @@ func (i *licheePi4AInstaller) GetOptions(extra licheePi4AExtraOptions) (overlay.
 	}, nil
 }
 
-func (i *licheePi4AInstaller) Install(options overlay.InstallOptions[licheePi4AExtraOptions]) error {
+func (i *licheePi4AInstaller) Install(ctx context.Context, options overlay.InstallOptions[licheePi4AExtraOptions]) error {
 	var f *os.File
 
 	f, err := os.OpenFile(options.InstallDisk, os.O_RDWR|unix.O_CLOEXEC, 0o666)

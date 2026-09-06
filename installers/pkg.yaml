@@ -2,14 +2,23 @@ name: sbc-riscv64
 variant: scratch
 shell: /bin/bash
 dependencies:
+  - stage: k3-pico-itx
+  - stage: licheepi-3a
   - stage: licheepi-4a
   - stage: profiles
   - stage: u-boot-jh7110
+    platform: linux/riscv64
+  - stage: u-boot-k1
     platform: linux/riscv64
   - stage: u-boot-licheepi-4a
     platform: linux/riscv64
   - stage: u-boot-qemu
     platform: linux/riscv64
+  # No LicheePi 3A entry - the K1 board has no upstream DTS yet.
+  - image: "{{ .BUILD_ARG_PKGS_PREFIX }}/kernel:{{ .BUILD_ARG_PKGS }}"
+    platform: linux/riscv64
+    from: /dtb/spacemit/k3-pico-itx.dtb
+    to: /rootfs/artifacts/riscv64/dtb/spacemit/k3-pico-itx.dtb
   - image: "{{ .BUILD_ARG_PKGS_PREFIX }}/kernel:{{ .BUILD_ARG_PKGS }}"
     platform: linux/riscv64
     from: /dtb/starfive/jh7110-milkv-marscm-lite.dtb

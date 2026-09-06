@@ -1,0 +1,27 @@
+# DDR training firmware for the SpacemiT K1. A proprietary prebuilt blob - unlike
+# the TH1520 one, there's no source to regenerate it from. U-Boot's SPL embeds it
+# via binman and executes it from SRAM to bring up DDR.
+# https://docs.u-boot.org/en/latest/board/spacemit/k1-spl.html
+name: spacemit-firmware-k1
+variant: scratch
+shell: /bin/bash
+dependencies:
+  - stage: base
+steps:
+  - sources:
+      - url: https://github.com/spacemit-com/spacemit-firmware/archive/{{ .spacemit_firmware_ref }}.tar.gz
+        destination: spacemit-firmware.tar.gz
+        sha256: "{{ .spacemit_firmware_sha256 }}"
+        sha512: "{{ .spacemit_firmware_sha512 }}"
+    env:
+      SOURCE_DATE_EPOCH: {{ .BUILD_ARG_SOURCE_DATE_EPOCH }}
+    prepare:
+      - |
+        tar xf spacemit-firmware.tar.gz --strip-components=1
+    install:
+      - |
+        mkdir -p /rootfs/artifacts/riscv64/spacemit-firmware/k1
+        cp -v k1/v0.2/ddr_fw.bin /rootfs/artifacts/riscv64/spacemit-firmware/k1
+finalize:
+  - from: /rootfs
+    to: /rootfs
