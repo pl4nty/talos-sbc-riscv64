@@ -1,6 +1,6 @@
 module licheepi-4a
 
-go 1.26.1
+go 1.26.5
 
 toolchain go1.27.1
 
@@ -11,6 +11,6 @@ require (
 )
 
 require (
-	go.yaml.in/yaml/v4 v4.0.0-rc.4 // indirect
+	go.yaml.in/yaml/v4 v4.0.0-rc.6 // indirect
 	gopkg.in/yaml.v3 v3.0.1 // indirect
 )
