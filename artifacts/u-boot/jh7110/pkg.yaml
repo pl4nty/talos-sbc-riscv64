@@ -18,6 +18,7 @@ steps:
     prepare:
       - |
         tar xf u-boot.tar.gz --strip-components=1
+        rm -f u-boot.tar.gz
       - |
         make starfive_visionfive2_defconfig
       - |

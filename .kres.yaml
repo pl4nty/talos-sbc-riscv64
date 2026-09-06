@@ -29,6 +29,8 @@ spec:
       toplevel: true
     - name: images
       toplevel: true
+    - name: bootloader-artifacts
+      toplevel: true
 ---
 # https://github.com/siderolabs/talos/blob/85f7be6e3f14bf160cf32bccf7418b31968d474f/Makefile#L427
 # TODO --privileged?
@@ -54,6 +56,15 @@ spec:
             --base-installer-image $(REGISTRY_AND_USERNAME)/installer-base:$(IMAGE_TAG_IN) \
             $(IMAGER_ARGS) ; \
         done
+---
+kind: custom.Step
+name: bootloader-artifacts
+spec:
+  makefile:
+    enabled: true
+    script:
+      - |
+        @$(MAKE) local-$(TARGETS) DEST=$(ARTIFACTS)
 ---
 kind: custom.Step
 name: images

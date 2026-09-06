@@ -44,6 +44,7 @@ steps:
     prepare:
       - |
         tar xf u-boot.tar.gz --strip-components=1
+        rm -f u-boot.tar.gz
       - |
         for patch in $(find /pkg/patches -type f -name "*.patch" | sort); do
           echo "Applying patch $patch"

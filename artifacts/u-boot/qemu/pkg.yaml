@@ -17,6 +17,7 @@ steps:
     prepare:
       - |
         tar xf u-boot.tar.gz --strip-components=1
+        rm -f u-boot.tar.gz
       - |
         make qemu-riscv64_smode_defconfig
       - |
