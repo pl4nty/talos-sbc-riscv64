@@ -3,8 +3,8 @@ env:
   TOOLS_PREFIX: ghcr.io/${{ github.repository_owner }}
   TOOLS: afd1ca6
   PKGS_PREFIX: ghcr.io/${{ github.repository_owner }}
-  PKGS: adfaa78
-  IMAGE_TAG_IN: v1.12.0-alpha.2-971-gadd82be78
+  PKGS: 49483a5
+  IMAGE_TAG_IN: v1.12.0-alpha.2-974-g88fb9b3ca
 
 concurrency:
   group: ${{ github.head_ref || github.run_id }}
@@ -14,6 +14,8 @@ concurrency:
     branches:
       - main
       - release-*
+      # test-only: LPi4A test image with the pkgs#23 kernel
+      - claude/project-thread-vop532
     tags:
       - v*
   pull_request:
@@ -89,6 +91,8 @@ jobs:
         run: |
           make bootloader-artifacts
       - name: save artifacts
+        # test-only: a 409 artifact-name conflict here skipped the images job on main
+        continue-on-error: true
         uses: nanoufo/action-upload-artifacts-and-release-assets@v2
         with:
           path: |
