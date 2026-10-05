@@ -33,5 +33,12 @@ vars:
   th1520_firmware_ref: 672c4441a8487bd1fcc8a8ae36824586c007625a
   th1520_firmware_sha256: bafcd0cd6e3d1304f88a9536434b6e4e0d3d52ae6bc484099dac83709d23ac87
   th1520_firmware_sha512: 6be5b4de62954bacd76afa0d44e0a3fe05b1e81be21dfa563725aeb0a8eb230881ebc12723437ba762c9518ecbcf08912bad68df5be43c97917953e1ec984f85
+
+  # Vendor AON (E902) firmware, bundled with the owner's OK. It has no
+  # redistribution licence, so it's fetched at build time, never committed.
+  # renovate: datasource=git-refs versioning=git depName=https://github.com/revyos/th1520-boot-firmware.git
+  th1520_aon_ref: 725756411ecc20f2c2dbc5ea6b8e5aacc6f83aad
+  th1520_aon_sha256: 5889265a629aed3986dbbe6f91b8b77255778a13a763bd1049ed22b82a4e17d5
+  th1520_aon_sha512: 688274748bc0c9e4bc2a6975ab94d1512ad95f7a69fff2737fbb27ac30f647007aaab8c999a3a16404b9b615785a696c61fd619ffa2e57327673badd1b52246f
 labels:
   org.opencontainers.image.source: https://github.com/pl4nty/talos-sbc-riscv64

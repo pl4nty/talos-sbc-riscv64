@@ -1,0 +1,84 @@
+diff --git a/board/thead/th1520_lpi4a/board.c b/board/thead/th1520_lpi4a/board.c
+index bb83e756..169b71ee 100644
+--- a/board/thead/th1520_lpi4a/board.c
++++ b/board/thead/th1520_lpi4a/board.c
+@@ -4,7 +4,11 @@
+  *
+  */
+ 
++#include <command.h>
+ #include <cpu_func.h>
++#include <vsprintf.h>
++#include <asm/io.h>
++#include <linux/string.h>
+ 
+ int board_init(void)
+ {
+@@ -12,3 +16,50 @@ int board_init(void)
+ 
+ 	return 0;
+ }
++
++/*
++ * Start the AON firmware on the E902 core, as the vendor U-Boot's bootaon
++ * does. The image must already carry the board's PMIC config header (see
++ * ziyao233/th1520-firmware aon-generate.sh). Linux's th1520-aon drivers
++ * talk to this firmware over the mailbox.
++ */
++#define TH1520_AON_SRAM		0xffffef8000UL	/* 0xffef8000 for the E902 */
++#define TH1520_AON_SRAM_SIZE	0x10000
++#define TH1520_AON_ENTRY	0xffef8c00	/* after the 0xc00 config header */
++#define TH1520_E902_START	0xfffff48044UL
++#define TH1520_E902_RST_CFG	0xfffff44024UL
++#define TH1520_E902_IOPMP	0xffffc21000UL
++
++static int do_bootaon(struct cmd_tbl *cmdtp, int flag, int argc,
++		      char *const argv[])
++{
++	ulong src, size;
++
++	if (argc != 3)
++		return CMD_RET_USAGE;
++
++	src = hextoul(argv[1], NULL);
++	size = hextoul(argv[2], NULL);
++	if (!size || size > TH1520_AON_SRAM_SIZE) {
++		printf("bootaon: bad image size 0x%lx\n", size);
++		return CMD_RET_FAILURE;
++	}
++	if (strncmp((const char *)src, "AON_CONFIG", 10)) {
++		printf("bootaon: no AON_CONFIG header\n");
++		return CMD_RET_FAILURE;
++	}
++
++	writel(0, (void *)TH1520_E902_RST_CFG);
++	memcpy((void *)TH1520_AON_SRAM, (void *)src, size);
++	flush_dcache_range(TH1520_AON_SRAM, TH1520_AON_SRAM + TH1520_AON_SRAM_SIZE);
++	writel(0xffffffff, (void *)(TH1520_E902_IOPMP + 0xc0));
++	writel(TH1520_AON_ENTRY, (void *)TH1520_E902_START);
++	writel(3, (void *)TH1520_E902_RST_CFG);
++	printf("AON firmware started (%lu bytes)\n", size);
++
++	return CMD_RET_SUCCESS;
++}
++
++U_BOOT_CMD(bootaon, 3, 0, do_bootaon,
++	   "start TH1520 AON firmware on the E902",
++	   "<addr> <size>");
+diff --git a/include/configs/th1520_lpi4a.h b/include/configs/th1520_lpi4a.h
+index 1f0fc51a..9200db22 100644
+--- a/include/configs/th1520_lpi4a.h
++++ b/include/configs/th1520_lpi4a.h
+@@ -20,8 +20,12 @@
+ #define CFG_EXTRA_ENV_SETTINGS \
+ 	"PS1=[LPi4A]# \0" \
+ 	"fdt_addr_r=0x46000000\0" \
++	"aon_addr_r=0x47000000\0" \
+ 	"fdtfile=thead/th1520-lichee-pi-4a.dtb\0" \
+ 	"bootcmd=" \
++		"if load mmc 0:1 ${aon_addr_r} th1520/aon-lpi4a.bin; then " \
++			"bootaon ${aon_addr_r} ${filesize}; " \
++		"fi; " \
+ 		"if load mmc 0:1 ${fdt_addr_r} dtb/${fdtfile}; then " \
+ 			"bootefi bootmgr ${fdt_addr_r}; " \
+ 		"fi; bootefi bootmgr\0"

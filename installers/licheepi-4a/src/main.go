@@ -73,6 +73,16 @@ func (i *licheePi4AInstaller) Install(ctx context.Context, options overlay.Insta
 		return err
 	}
 
+	// U-Boot's bootcmd starts this on the E902 before loading the kernel.
+	aonDir := filepath.Join(options.MountPrefix, "/boot/EFI/th1520")
+	if err = os.MkdirAll(aonDir, 0o755); err != nil {
+		return err
+	}
+
+	if err = copy.File(filepath.Join(options.ArtifactsPath, "riscv64/th1520-firmware/th1520-aon-lpi4a.bin"), filepath.Join(aonDir, "aon-lpi4a.bin")); err != nil {
+		return err
+	}
+
 	// allows to copy a directory from the overlay to the target
 	return copy.Dir(filepath.Join(options.ArtifactsPath, "riscv64/dtb"), filepath.Join(options.MountPrefix, "/boot/EFI/dtb"))
 }

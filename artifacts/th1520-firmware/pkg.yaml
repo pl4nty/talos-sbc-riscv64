@@ -9,6 +9,10 @@ steps:
         destination: th1520-firmware.tar.gz
         sha256: "{{ .th1520_firmware_sha256 }}"
         sha512: "{{ .th1520_firmware_sha512 }}"
+      - url: https://raw.githubusercontent.com/revyos/th1520-boot-firmware/{{ .th1520_aon_ref }}/addons/boot/light_aon_fpga.bin
+        destination: light_aon_fpga.bin
+        sha256: "{{ .th1520_aon_sha256 }}"
+        sha512: "{{ .th1520_aon_sha512 }}"
     env:
       SOURCE_DATE_EPOCH: {{ .BUILD_ARG_SOURCE_DATE_EPOCH }}
     prepare:
@@ -17,10 +21,16 @@ steps:
     build:
       - |
         lua ddr-generate.lua src/lpddr4x-3733-dualrank.lua th1520-ddr-firmware.bin
+      - |
+        # Fill in the LPi4A PMIC config header (DA9063 + DA9121), as
+        # aon-generate.sh does but without its ELF wrapper: U-Boot's bootaon
+        # copies the raw image into AON SRAM.
+        cp light_aon_fpga.bin th1520-aon-lpi4a.bin
+        dd if=bin/lpi4a-aon.patch.bin of=th1520-aon-lpi4a.bin conv=notrunc
     install:
       - |
         mkdir -p /rootfs/artifacts/riscv64/th1520-firmware
-        cp -v th1520-ddr-firmware.bin /rootfs/artifacts/riscv64/th1520-firmware
+        cp -v th1520-ddr-firmware.bin th1520-aon-lpi4a.bin /rootfs/artifacts/riscv64/th1520-firmware
 finalize:
   - from: /rootfs
     to: /rootfs
