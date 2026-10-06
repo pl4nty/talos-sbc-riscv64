@@ -1,0 +1,48 @@
+From c6d0dfb42551990076d70ac34a91d64ed592bd7d Mon Sep 17 00:00:00 2001
+From: Claude <noreply@anthropic.com>
+Date: Tue, 6 Oct 2026 07:57:48 +0000
+Subject: [PATCH 17/17] spacemit: k1: load U-Boot from the eMMC boot partition
+
+Read the U-Boot FIT from a raw sector of the eMMC hardware boot partition,
+next to the FSBL, rather than from a GPT partition of the user area. This
+leaves the whole user area to the OS image. SD cards have no hardware
+partitions, so read the same sector from their user area.
+---
+ board/spacemit/k1/spl.c | 14 ++++++++++++++
+ 1 file changed, 14 insertions(+)
+
+diff --git a/board/spacemit/k1/spl.c b/board/spacemit/k1/spl.c
+index 73d49826..0c66a3c0 100644
+--- a/board/spacemit/k1/spl.c
++++ b/board/spacemit/k1/spl.c
+@@ -17,6 +17,7 @@
+ #include <linux/ctype.h>
+ #include <linux/delay.h>
+ #include <log.h>
++#include <mmc.h>
+ #include <power/regulator.h>
+ #include <spi_flash.h>
+ #include <spl.h>
+@@ -460,6 +461,19 @@ void board_init_f(ulong dummy)
+ 	nor_early_init();
+ }
+ 
++/*
++ * eMMC: load U-Boot from a raw sector of the hardware boot partition that
++ * holds the FSBL, so the whole user area is free for the OS. The SD card has
++ * no hardware partitions, so read the same sector from its user area.
++ */
++u32 spl_mmc_boot_mode(struct mmc *mmc, const u32 boot_device)
++{
++	if (boot_device == BOOT_DEVICE_MMC1)
++		return MMCSD_MODE_EMMCBOOT;
++
++	return MMCSD_MODE_RAW;
++}
++
+ u32 spl_boot_device(void)
+ {
+ 	u32 mode;
+-- 
+2.43.0
+

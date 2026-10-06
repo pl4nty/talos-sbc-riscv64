@@ -13,10 +13,10 @@
 # from SPI NOR. The SPL image still has to be signed into an FSBL with SpacemiT's
 # vendor tooling before the boot ROM will accept it - see the guide above.
 #
-# CONFIG_OF_LIST covers the BPI-F3 and MusePi Pro; there's no LicheePi 3A DT
-# upstream, so that board needs its fdt supplied some other way.
+# CONFIG_OF_LIST covers the BPI-F3 and MusePi Pro. There's no LicheePi 3A DT
+# upstream, but the 3A runs the BPI-F3 one (see patch 0016).
 #
-# patches/ carries two in-flight series on top of the RC:
+# patches/ carries two in-flight series on top of the RC, plus local changes:
 #   0001-0008  K3 clock tree and reset drivers, plus the K1 reset refactor they
 #              build on. Groundwork only - no K3 board target exists yet, so the
 #              K3 halves aren't selected by spacemit_k1_defconfig.
@@ -25,6 +25,8 @@
 #              from SPI NOR; this adds the sdhci driver, boot-device selection
 #              and the defconfig changes needed to boot off a card.
 #              https://patchwork.ozlabs.org/series/522006/
+#   0016       LicheePi 3A EEPROM name -> BPI-F3 DT, and fdtfile from the DT.
+#   0017       Load U-Boot from a raw sector of eMMC boot0, not a GPT partition.
 # Drop each once it lands in a tagged release.
 name: u-boot-k1
 variant: scratch
@@ -56,6 +58,24 @@ steps:
         # mkeficapsule needs gnutls with PKCS#11, which the tools image doesn't
         # carry, and nothing here builds EFI capsules.
         ./scripts/config --disable TOOLS_MKEFICAPSULE
+      - |
+        # Talos images own the eMMC user area, so the SPL reads U-Boot from
+        # 1 MiB into the boot0 hardware partition, after bootinfo (0) and the
+        # FSBL (0x200). See installers/licheepi-3a.
+        ./scripts/config \
+          --disable SYS_MMCSD_RAW_MODE_U_BOOT_USE_PARTITION \
+          --enable SYS_MMCSD_RAW_MODE_U_BOOT_USE_SECTOR \
+          --set-val SYS_MMCSD_RAW_MODE_U_BOOT_SECTOR 0x800 \
+          --enable SUPPORT_EMMC_BOOT_OVERRIDE_PART_CONFIG \
+          --set-val SYS_MMCSD_RAW_MODE_EMMC_BOOT_PARTITION 1
+        # Fall back to the BPI-F3 DT when the board EEPROM can't be read: the
+        # LicheePi 3A is the same design, and it's the only K1 board here.
+        # Autoboot through bootstd, and set fdtfile so EFI loads the OS's DTB.
+        ./scripts/config \
+          --set-str DEFAULT_DEVICE_TREE spacemit/k1-bananapi-f3 \
+          --enable BOARD_LATE_INIT \
+          --enable BOOTSTD_DEFAULTS \
+          --enable USE_BOOTCOMMAND
         make olddefconfig
     build:
       - |

@@ -42,10 +42,37 @@ steps:
         python3 tools/build_binary_file.py \
           -c board/spacemit/k1-x/configs/fsbl_ddr.json \
           -o FSBL.bin
+      - |
+        # The boot ROM finds the FSBL through an 80-byte bootinfo header at
+        # offset 0 of the boot device.
+        for dev in emmc spinor; do
+          python3 tools/build_binary_file.py \
+            -c board/spacemit/k1-x/configs/bootinfo_${dev}.json \
+            -o bootinfo_${dev}.bin
+        done
+      - |
+        # One image for the eMMC boot0 hardware partition: bootinfo at 0, the
+        # FSBL at 0x200 (bootinfo_emmc spl0_offset) and U-Boot at 1 MiB
+        # (CONFIG_SYS_MMCSD_RAW_MODE_U_BOOT_SECTOR=0x800 in u-boot-k1).
+        itb=/rootfs/artifacts/riscv64/u-boot/k1/u-boot.itb
+        if [ $(stat -c %s FSBL.bin) -gt $((0x100000 - 0x200)) ]; then
+          echo "FSBL.bin overlaps U-Boot"; exit 1
+        fi
+        if [ $(stat -c %s ${itb}) -gt $((0x300000)) ]; then
+          echo "u-boot.itb doesn't fit in a 4 MiB boot0"; exit 1
+        fi
+        truncate -s 1M boot0.img
+        dd if=bootinfo_emmc.bin of=boot0.img conv=notrunc
+        dd if=FSBL.bin of=boot0.img bs=512 seek=1 conv=notrunc
+        cat ${itb} >> boot0.img
+        # SpacemiT's fastboot ("fastboot flash fsbl") writes its payload at
+        # boot0+0x200 and "flash bootinfo" writes the header, so it takes
+        # boot0.img split at 0x200.
+        tail -c +513 boot0.img > boot0-fsbl.img
     install:
       - |
         mkdir -p /rootfs/artifacts/riscv64/fsbl/k1
-        cp -v FSBL.bin /rootfs/artifacts/riscv64/fsbl/k1
+        cp -v FSBL.bin bootinfo_*.bin boot0.img boot0-fsbl.img /rootfs/artifacts/riscv64/fsbl/k1
 finalize:
   - from: /rootfs
     to: /rootfs

@@ -16,6 +16,8 @@ concurrency:
       - release-*
       # test-only: LPi4A test image with the pkgs#23 kernel
       - claude/project-thread-vop532
+      # test-only: LicheePi 3A test image
+      - claude/project-thread-cv8ehe
     tags:
       - v*
   pull_request:

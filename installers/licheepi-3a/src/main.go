@@ -36,12 +36,15 @@ func (i *licheePi3AInstaller) GetOptions(ctx context.Context, extra licheePi3AEx
 }
 
 func (i *licheePi3AInstaller) Install(ctx context.Context, options overlay.InstallOptions[licheePi3AExtraOptions]) error {
-	// ROM -> vendor FSBL -> U-Boot (see artifacts/u-boot/k1) -> OpenSBI -> kernel
-	// The K1 boot ROM loads the vendor FSBL from SPI NOR, so nothing is written
-	// to the install disk here.
+	// ROM -> FSBL (U-Boot SPL) -> OpenSBI -> U-Boot -> GRUB (EFI) -> kernel
+	// The boot ROM reads bootinfo and the FSBL from the eMMC boot0 hardware
+	// partition, and the SPL reads U-Boot from 1 MiB into boot0, so the
+	// install disk (the eMMC user area) carries nothing outside the Talos
+	// partitions. artifacts/riscv64/fsbl/k1/boot0.img is written to boot0
+	// separately, through the boot ROM's USB download mode.
 
-	// The LicheePi 3A has no upstream DTS, so riscv64/dtb carries no DTB for it
-	// yet - U-Boot has to supply the fdt. The copy still runs so the board picks
-	// up its DTB automatically once one lands in the kernel package.
+	// There's no upstream LicheePi 3A DTS. U-Boot sets fdtfile to the BPI-F3
+	// DTB, which matches the 3A (both are the K1 reference design), and the
+	// EFI loader reads it from dtb/ on the ESP.
 	return copy.Dir(filepath.Join(options.ArtifactsPath, "riscv64/dtb"), filepath.Join(options.MountPrefix, "/boot/EFI/dtb"))
 }
