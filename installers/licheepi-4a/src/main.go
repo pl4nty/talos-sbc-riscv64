@@ -31,6 +31,8 @@ func (i *licheePi4AInstaller) GetOptions(ctx context.Context, extra licheePi4AEx
 		"console=ttyS0,115200",
 		"sysctl.kernel.kexec_load_disabled=1",
 		"talos.dashboard.disabled=1",
+		// The TH1520 BXM-4-64 is still marked experimental in the powervr driver.
+		"powervr.exp_hw_support=1",
 	}
 
 	return overlay.Options{
