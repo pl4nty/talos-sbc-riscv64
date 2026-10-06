@@ -16,7 +16,12 @@ dependencies:
     platform: linux/riscv64
   - stage: u-boot-qemu
     platform: linux/riscv64
-  # No LicheePi 3A entry - the K1 board has no upstream DTS yet.
+  # The LicheePi 3A has no upstream DTS; it's the K1 reference design and
+  # boots the BPI-F3 one (see artifacts/u-boot/k1).
+  - image: "{{ .BUILD_ARG_PKGS_PREFIX }}/kernel:{{ .BUILD_ARG_PKGS }}"
+    platform: linux/riscv64
+    from: /dtb/spacemit/k1-bananapi-f3.dtb
+    to: /rootfs/artifacts/riscv64/dtb/spacemit/k1-bananapi-f3.dtb
   - image: "{{ .BUILD_ARG_PKGS_PREFIX }}/kernel:{{ .BUILD_ARG_PKGS }}"
     platform: linux/riscv64
     from: /dtb/spacemit/k3-pico-itx.dtb
