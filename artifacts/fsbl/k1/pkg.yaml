@@ -65,10 +65,14 @@ steps:
         dd if=bootinfo_emmc.bin of=boot0.img conv=notrunc
         dd if=FSBL.bin of=boot0.img bs=512 seek=1 conv=notrunc
         cat ${itb} >> boot0.img
+        # SpacemiT's fastboot ("fastboot flash fsbl") writes its payload at
+        # boot0+0x200 and "flash bootinfo" writes the header, so it takes
+        # boot0.img split at 0x200.
+        tail -c +513 boot0.img > boot0-fsbl.img
     install:
       - |
         mkdir -p /rootfs/artifacts/riscv64/fsbl/k1
-        cp -v FSBL.bin bootinfo_*.bin boot0.img /rootfs/artifacts/riscv64/fsbl/k1
+        cp -v FSBL.bin bootinfo_*.bin boot0.img boot0-fsbl.img /rootfs/artifacts/riscv64/fsbl/k1
 finalize:
   - from: /rootfs
     to: /rootfs
