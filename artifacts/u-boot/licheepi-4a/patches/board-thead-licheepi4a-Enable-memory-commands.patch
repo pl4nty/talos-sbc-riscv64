@@ -1,0 +1,13 @@
+diff --git a/configs/th1520_lpi4a_defconfig b/configs/th1520_lpi4a_defconfig
+index eba99798..78fe9aab 100644
+--- a/configs/th1520_lpi4a_defconfig
++++ b/configs/th1520_lpi4a_defconfig
+@@ -64,7 +64,7 @@ CONFIG_CMD_BOOTMENU=y
+ # CONFIG_CMD_EDITENV is not set
+ # CONFIG_CMD_SAVEENV is not set
+ # CONFIG_CMD_CRC32 is not set
+-# CONFIG_CMD_MEMORY is not set
++CONFIG_CMD_MEMORY=y
+ # CONFIG_CMD_LZMADEC is not set
+ # CONFIG_CMD_UNLZ4 is not set
+ # CONFIG_CMD_UNZIP is not set
