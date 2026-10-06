@@ -1,5 +1,5 @@
 diff --git a/board/thead/th1520_lpi4a/board.c b/board/thead/th1520_lpi4a/board.c
-index bb83e756..169b71ee 100644
+index bb83e756..beca3263 100644
 --- a/board/thead/th1520_lpi4a/board.c
 +++ b/board/thead/th1520_lpi4a/board.c
 @@ -4,7 +4,11 @@
@@ -14,7 +14,7 @@ index bb83e756..169b71ee 100644
  
  int board_init(void)
  {
-@@ -12,3 +16,50 @@ int board_init(void)
+@@ -12,3 +16,57 @@ int board_init(void)
  
  	return 0;
  }
@@ -31,6 +31,7 @@ index bb83e756..169b71ee 100644
 +#define TH1520_E902_START	0xfffff48044UL
 +#define TH1520_E902_RST_CFG	0xfffff44024UL
 +#define TH1520_E902_IOPMP	0xffffc21000UL
++#define TH1520_AUDIO_RST_CFG	0xfffff4403cUL
 +
 +static int do_bootaon(struct cmd_tbl *cmdtp, int flag, int argc,
 +		      char *const argv[])
@@ -51,6 +52,12 @@ index bb83e756..169b71ee 100644
 +		return CMD_RET_FAILURE;
 +	}
 +
++	/*
++	 * The firmware never answers Linux's mailbox RPCs while the audio
++	 * subsystem is held in module reset. 0x37 releases the subsystem but
++	 * keeps its C906 core in reset. Doing this in SPL hangs the boot.
++	 */
++	writel(0x37, (void *)TH1520_AUDIO_RST_CFG);
 +	writel(0, (void *)TH1520_E902_RST_CFG);
 +	memcpy((void *)TH1520_AON_SRAM, (void *)src, size);
 +	flush_dcache_range(TH1520_AON_SRAM, TH1520_AON_SRAM + TH1520_AON_SRAM_SIZE);
