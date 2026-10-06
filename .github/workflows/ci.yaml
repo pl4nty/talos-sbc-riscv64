@@ -4,7 +4,7 @@ env:
   TOOLS: afd1ca6
   PKGS_PREFIX: ghcr.io/${{ github.repository_owner }}
   PKGS: 0cba42e
-  IMAGE_TAG_IN: v1.12.0-alpha.2-980-g03b3cbec6
+  IMAGE_TAG_IN: v1.12.0-alpha.2-981-gdfad60e12
 
 concurrency:
   group: ${{ github.head_ref || github.run_id }}
