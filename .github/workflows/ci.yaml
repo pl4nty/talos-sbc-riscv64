@@ -186,8 +186,8 @@ jobs:
         if: github.event_name != 'pull_request'
         run: |
           tag=$(git describe --tag --always --dirty --match 'v[0-9]*')
-          for f in _out/installer-*-riscv64.tar; do
-            board=$(basename "${f}" -riscv64.tar)
+          for f in _out/installer-*/installer-riscv64.tar; do
+            board=$(basename "$(dirname "${f}")")
             board=${board#installer-}
             crane push "${f}" "ghcr.io/${GITHUB_REPOSITORY_OWNER,,}/installer-${board}:${tag}"
           done

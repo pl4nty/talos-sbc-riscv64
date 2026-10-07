@@ -198,8 +198,7 @@ images:
 installer-images:
 	@for profile in profiles/$(or $(BOARDS),*)/; do \
 	  target=$$(basename "$${profile}") && \
-	  $(MAKE) image-installer IMAGER_ARGS="--overlay-name $$target --overlay-image $(REGISTRY_AND_USERNAME)/$(TARGETS):$(TAG)" && \
-	  mv $(ARTIFACTS)/installer-riscv64.tar $(ARTIFACTS)/installer-$$target-riscv64.tar ; \
+	  $(MAKE) image-installer IMAGER_ARGS="--overlay-name $$target --overlay-image $(REGISTRY_AND_USERNAME)/$(TARGETS):$(TAG) --output /out/installer-$$target" || exit 1 ; \
 	done
 
 bootloader-artifacts:
