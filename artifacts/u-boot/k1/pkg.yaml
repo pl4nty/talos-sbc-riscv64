@@ -27,6 +27,10 @@
 #              https://patchwork.ozlabs.org/series/522006/
 #   0016       LicheePi 3A EEPROM name -> BPI-F3 DT, and fdtfile from the DT.
 #   0017       Load U-Boot from a raw sector of eMMC boot0, not a GPT partition.
+#   0018       SPL boot order: detected device, then eMMC, SD, SPI.
+#   0019       Don't panic in SPL when there's no SPI NOR (LicheePi 3A).
+#   0020       Turn the LicheePi 3A carrier fan (GPIO_79) on in SPL.
+#   0021       ethaddr/eth1addr from the TLV EEPROM, so the OS gets stable MACs.
 # Drop each once it lands in a tagged release.
 name: u-boot-k1
 variant: scratch
@@ -76,6 +80,12 @@ steps:
           --enable BOARD_LATE_INIT \
           --enable BOOTSTD_DEFAULTS \
           --enable USE_BOOTCOMMAND
+        # Reset through SBI SRST: OpenSBI's SpacemiT P1 PMIC driver does the
+        # actual reset. Without it, `reset` stops with "not supported yet".
+        ./scripts/config \
+          --enable SYSRESET \
+          --enable SYSRESET_SBI \
+          --disable SPL_SYSRESET
         make olddefconfig
     build:
       - |
