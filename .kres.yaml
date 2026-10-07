@@ -33,6 +33,8 @@ spec:
       toplevel: true
     - name: images
       toplevel: true
+    - name: installer-images
+      toplevel: true
     - name: bootloader-artifacts
       toplevel: true
 ---
@@ -80,6 +82,21 @@ spec:
         @for profile in profiles/$(or $(BOARDS),*)/; do \
           target=$$(basename "$${profile}") && \
           $(MAKE) image-$$target IMAGER_ARGS="--overlay-name $$target --overlay-image $(REGISTRY_AND_USERNAME)/$(TARGETS):$(TAG)" ; \
+        done
+---
+# One installer per board, with the overlay baked in, for talosctl upgrade
+# (the riscv64 stand-in for factory.talos.dev/installer/<schematic>).
+kind: custom.Step
+name: installer-images
+spec:
+  makefile:
+    enabled: true
+    script:
+      - |
+        @for profile in profiles/$(or $(BOARDS),*)/; do \
+          target=$$(basename "$${profile}") && \
+          $(MAKE) image-installer IMAGER_ARGS="--overlay-name $$target --overlay-image $(REGISTRY_AND_USERNAME)/$(TARGETS):$(TAG)" && \
+          mv $(ARTIFACTS)/installer-riscv64.tar $(ARTIFACTS)/installer-$$target-riscv64.tar ; \
         done
 # doesn't merge with pkgfile.Build
 ---

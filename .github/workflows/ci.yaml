@@ -109,16 +109,16 @@ jobs:
         with:
           path: |
             _out/artifacts/**
-      - name: release-notes
+      - name: release-assets
         if: startsWith(github.ref, 'refs/tags/')
         run: |
-          make release-notes
-      - name: Release
+          ./hack/release-assets.sh _out/artifacts _out/release
+      - name: save release assets
         if: startsWith(github.ref, 'refs/tags/')
-        uses: softprops/action-gh-release@efb35369e0ad2afab669f228072c1b0d510eae64 # version: v3.0.3
+        uses: actions/upload-artifact@v4
         with:
-          body_path: _out/RELEASE_NOTES.md
-          draft: "true"
+          name: release-bootloaders
+          path: _out/release/
   images:
     permissions:
       actions: read
@@ -174,3 +174,57 @@ jobs:
         with:
           path: |
             _out/*.raw.*
+      # One installer per board with the overlay baked in, so talosctl upgrade
+      # keeps the board's bootloader files (factory.talos.dev/installer stand-in).
+      - name: installer-images
+        run: |
+          make installer-images
+      - name: Set up crane
+        if: github.event_name != 'pull_request'
+        uses: imjasonh/setup-crane@v0.4
+      - name: Push installers
+        if: github.event_name != 'pull_request'
+        run: |
+          tag=$(git describe --tag --always --dirty --match 'v[0-9]*')
+          for f in _out/installer-*-riscv64.tar; do
+            board=$(basename "${f}" -riscv64.tar)
+            board=${board#installer-}
+            crane push "${f}" "ghcr.io/${GITHUB_REPOSITORY_OWNER,,}/installer-${board}:${tag}"
+          done
+  release:
+    permissions:
+      contents: write
+    runs-on: ubuntu-latest
+    if: startsWith(github.ref, 'refs/tags/')
+    needs:
+      - default
+      - images
+    steps:
+      - name: checkout
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # version: v7.0.1
+      - name: Unshallow
+        run: |
+          git fetch --prune --unshallow
+      - name: Download images
+        uses: actions/download-artifact@v4
+        with:
+          pattern: metal-*
+          path: _out/release
+          merge-multiple: true
+      - name: Download bootloaders
+        uses: actions/download-artifact@v4
+        with:
+          name: release-bootloaders
+          path: _out/release
+      - name: checksums
+        run: |
+          cd _out/release && sha256sum * > sha256sum.txt
+      - name: release-notes
+        run: |
+          make release-notes
+      - name: Release
+        uses: softprops/action-gh-release@efb35369e0ad2afab669f228072c1b0d510eae64 # version: v3.0.3
+        with:
+          body_path: _out/RELEASE_NOTES.md
+          draft: "true"
+          files: _out/release/*
