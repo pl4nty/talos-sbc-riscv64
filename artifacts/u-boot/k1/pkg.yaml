@@ -29,6 +29,7 @@
 #   0017       Load U-Boot from a raw sector of eMMC boot0, not a GPT partition.
 #   0018       SPL boot order: detected device, then eMMC, SD, SPI.
 #   0019       Don't panic in SPL when there's no SPI NOR (LicheePi 3A).
+#   0020       Turn the LicheePi 3A carrier fan (GPIO_79) on in SPL.
 # Drop each once it lands in a tagged release.
 name: u-boot-k1
 variant: scratch

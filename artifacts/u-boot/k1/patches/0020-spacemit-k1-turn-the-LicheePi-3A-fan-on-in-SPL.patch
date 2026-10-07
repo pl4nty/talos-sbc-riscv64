@@ -1,0 +1,66 @@
+From 93120ebb31437f477cd74d8d7f63061742747adb Mon Sep 17 00:00:00 2001
+From: Claude <noreply@anthropic.com>
+Date: Wed, 7 Oct 2026 04:22:58 +0000
+Subject: [PATCH] spacemit: k1: turn the LicheePi 3A fan on in SPL
+
+The LicheePi 3A carrier drives its fan from GPIO_79 (SODIMM pin 212), and
+nothing turns it on, so the board runs hot. Drive the pin high in SPL when
+the EEPROM names the board as a 3A.
+---
+ board/spacemit/k1/spl.c | 26 ++++++++++++++++++++++++++
+ 1 file changed, 26 insertions(+)
+
+diff --git a/board/spacemit/k1/spl.c b/board/spacemit/k1/spl.c
+index 67c9de2d..97637e8d 100644
+--- a/board/spacemit/k1/spl.c
++++ b/board/spacemit/k1/spl.c
+@@ -48,6 +48,11 @@
+ 
+ #define MFP_GPIO_84		0xd401e154
+ #define MFP_GPIO_85		0xd401e158
++#define MFP_GPIO_79		0xd401e140
++
++#define APBC_GPIO_CLK_RST	0xd4015008
++#define GPIO_BANK2_PSR		0xd4019020	/* set output level */
++#define GPIO_BANK2_SDR		0xd401905c	/* set direction to output */
+ 
+ #define DDR_FIRMWARE_BASE	0xc082d000
+ 
+@@ -190,6 +195,26 @@ int read_product_name(char *name, int size)
+ 	return -ENOENT;
+ }
+ 
++/*
++ * The LicheePi 3A carrier drives its fan from GPIO_79 (SODIMM pin 212). Turn
++ * the fan on at full speed as early as possible, so the board stays cool even
++ * when the OS has no fan control.
++ */
++static void lpi3a_fan_on(void)
++{
++	if (strncmp(product_name, "k1-x_lpi3a", strlen("k1-x_lpi3a")) &&
++	    strncmp(product_name, "k1_lpi3a", strlen("k1_lpi3a")))
++		return;
++
++	clrsetbits_le32((void __iomem *)APBC_GPIO_CLK_RST, BIT(2),
++			BIT(1) | BIT(0));
++	writel(EDGE_NONE | PAD_DS_MEDIUM,	/* mux 0: GPIO */
++	       (void __iomem *)MFP_GPIO_79);
++	writel(BIT(79 % 32), (void __iomem *)GPIO_BANK2_PSR);
++	writel(BIT(79 % 32), (void __iomem *)GPIO_BANK2_SDR);
++	log_info("LicheePi 3A: fan on\n");
++}
++
+ static void fixup_product_name(void)
+ {
+ 	char fdt_name[I2C_BUF_SIZE];
+@@ -460,6 +485,7 @@ void board_init_f(ulong dummy)
+ 		log_info("Fail to detect board:%d\n", ret);
+ 	else
+ 		log_info("Get board name:%s\n", product_name);
++	lpi3a_fan_on();
+ 	fixup_product_name();
+ 	pmic_init();
+ 
+-- 
+2.43.0
+
