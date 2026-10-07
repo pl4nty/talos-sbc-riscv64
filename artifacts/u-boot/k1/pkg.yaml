@@ -78,6 +78,12 @@ steps:
           --enable BOARD_LATE_INIT \
           --enable BOOTSTD_DEFAULTS \
           --enable USE_BOOTCOMMAND
+        # Reset through SBI SRST: OpenSBI's SpacemiT P1 PMIC driver does the
+        # actual reset. Without it, `reset` stops with "not supported yet".
+        ./scripts/config \
+          --enable SYSRESET \
+          --enable SYSRESET_SBI \
+          --disable SPL_SYSRESET
         make olddefconfig
     build:
       - |
