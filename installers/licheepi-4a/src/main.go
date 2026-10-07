@@ -33,6 +33,10 @@ func (i *licheePi4AInstaller) GetOptions(ctx context.Context, extra licheePi4AEx
 		"talos.dashboard.disabled=1",
 		// The TH1520 BXM-4-64 is still marked experimental in the powervr driver.
 		"powervr.exp_hw_support=1",
+		// Talos loads modules from udev after the default 10 s deferred-probe
+		// timeout, so module-provided suppliers (TH1520 AON power domains,
+		// GPU power sequencer) can miss it and powervr fails with -ETIMEDOUT.
+		"deferred_probe_timeout=120",
 	}
 
 	return overlay.Options{
