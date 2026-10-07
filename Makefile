@@ -6,6 +6,10 @@
 
 SHA := $(shell git describe --match=none --always --abbrev=8 --dirty)
 TAG ?= $(shell git describe --tag --always --dirty --match v[0-9]\*)
+# BOARDS limits the overlay and images to one board (a profiles/ directory
+# name, e.g. licheepi-3a). Empty builds every board.
+BOARDS ?=
+
 TAG_SUFFIX ?=
 ABBREV_TAG ?= $(shell git describe --tags >/dev/null 2>/dev/null && git describe --tag --always --match v[0-9]\* --abbrev=0 || echo 'undefined')
 BRANCH := $(shell git rev-parse --abbrev-ref HEAD)
@@ -44,6 +48,7 @@ BUILD_ARGS += --build-arg=PKGS_PREFIX="$(PKGS_PREFIX)"
 BUILD_ARGS += --build-arg=PKGS="$(PKGS)"
 BUILD_ARGS += --build-arg=TOOLS_PREFIX="$(TOOLS_PREFIX)"
 BUILD_ARGS += --build-arg=TOOLS="$(TOOLS)"
+BUILD_ARGS += --build-arg=BOARDS="$(BOARDS)"
 COMMON_ARGS = --file=Pkgfile
 COMMON_ARGS += --provenance=false
 COMMON_ARGS += --sbom=false
@@ -185,7 +190,7 @@ image-%:
 	done
 
 images:
-	@for profile in profiles/*/; do \
+	@for profile in profiles/$(or $(BOARDS),*)/; do \
 	  target=$$(basename "$${profile}") && \
 	  $(MAKE) image-$$target IMAGER_ARGS="--overlay-name $$target --overlay-image $(REGISTRY_AND_USERNAME)/$(TARGETS):$(TAG)" ; \
 	done

@@ -8,8 +8,12 @@ spec:
     - PKGS
     - TOOLS_PREFIX
     - TOOLS
+    - BOARDS
   makefile:
     extraVariables:
+      # Limits the overlay and images to one board (a profiles/ directory
+      # name, e.g. licheepi-3a). Empty builds every board.
+      - name: BOARDS
       - name: TAG_SUFFIX
       - name: TAG_SUFFIX_IN
         defaultValue: $(TAG_SUFFIX)
@@ -73,7 +77,7 @@ spec:
     enabled: true
     script:
       - |
-        @for profile in profiles/*/; do \
+        @for profile in profiles/$(or $(BOARDS),*)/; do \
           target=$$(basename "$${profile}") && \
           $(MAKE) image-$$target IMAGER_ARGS="--overlay-name $$target --overlay-image $(REGISTRY_AND_USERNAME)/$(TARGETS):$(TAG)" ; \
         done

@@ -1,20 +1,22 @@
 name: sbc-riscv64
 variant: scratch
 shell: /bin/bash
+# BOARDS (build arg, from the Makefile) limits the build to one board's
+# artifacts, for fast test builds. Empty builds every board.
 dependencies:
-  - stage: k3-pico-itx
-  - stage: licheepi-3a
-  - stage: licheepi-4a
   - stage: profiles
+  {{ if or (not .BUILD_ARG_BOARDS) (eq .BUILD_ARG_BOARDS "k3-pico-itx") }}
+  - stage: k3-pico-itx
+  - image: "{{ .BUILD_ARG_PKGS_PREFIX }}/kernel:{{ .BUILD_ARG_PKGS }}"
+    platform: linux/riscv64
+    from: /dtb/spacemit/k3-pico-itx.dtb
+    to: /rootfs/artifacts/riscv64/dtb/spacemit/k3-pico-itx.dtb
+  {{ end }}
+  {{ if or (not .BUILD_ARG_BOARDS) (eq .BUILD_ARG_BOARDS "licheepi-3a") }}
+  - stage: licheepi-3a
   - stage: fsbl-k1
     platform: linux/riscv64
-  - stage: u-boot-jh7110
-    platform: linux/riscv64
   - stage: u-boot-k1
-    platform: linux/riscv64
-  - stage: u-boot-licheepi-4a
-    platform: linux/riscv64
-  - stage: u-boot-qemu
     platform: linux/riscv64
   # The LicheePi 3A has no upstream DTS; it's the K1 reference design and
   # boots the BPI-F3 one (see artifacts/u-boot/k1).
@@ -22,18 +24,26 @@ dependencies:
     platform: linux/riscv64
     from: /dtb/spacemit/k1-bananapi-f3.dtb
     to: /rootfs/artifacts/riscv64/dtb/spacemit/k1-bananapi-f3.dtb
-  - image: "{{ .BUILD_ARG_PKGS_PREFIX }}/kernel:{{ .BUILD_ARG_PKGS }}"
+  {{ end }}
+  {{ if or (not .BUILD_ARG_BOARDS) (eq .BUILD_ARG_BOARDS "licheepi-4a") }}
+  - stage: licheepi-4a
+  - stage: u-boot-licheepi-4a
     platform: linux/riscv64
-    from: /dtb/spacemit/k3-pico-itx.dtb
-    to: /rootfs/artifacts/riscv64/dtb/spacemit/k3-pico-itx.dtb
-  - image: "{{ .BUILD_ARG_PKGS_PREFIX }}/kernel:{{ .BUILD_ARG_PKGS }}"
-    platform: linux/riscv64
-    from: /dtb/starfive/jh7110-milkv-marscm-lite.dtb
-    to: /rootfs/artifacts/riscv64/dtb/starfive/jh7110-milkv-marscm-lite.dtb
   - image: "{{ .BUILD_ARG_PKGS_PREFIX }}/kernel:{{ .BUILD_ARG_PKGS }}"
     platform: linux/riscv64
     from: /dtb/thead/th1520-lichee-pi-4a.dtb
     to: /rootfs/artifacts/riscv64/dtb/thead/th1520-lichee-pi-4a.dtb
+  {{ end }}
+  {{ if not .BUILD_ARG_BOARDS }}
+  - stage: u-boot-jh7110
+    platform: linux/riscv64
+  - stage: u-boot-qemu
+    platform: linux/riscv64
+  - image: "{{ .BUILD_ARG_PKGS_PREFIX }}/kernel:{{ .BUILD_ARG_PKGS }}"
+    platform: linux/riscv64
+    from: /dtb/starfive/jh7110-milkv-marscm-lite.dtb
+    to: /rootfs/artifacts/riscv64/dtb/starfive/jh7110-milkv-marscm-lite.dtb
+  {{ end }}
 finalize:
   - from: /rootfs
     to: /

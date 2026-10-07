@@ -5,6 +5,9 @@ env:
   PKGS_PREFIX: ghcr.io/${{ github.repository_owner }}
   PKGS: dba5903
   IMAGE_TAG_IN: v1.12.0-alpha.2-982-gb0a51ab0c
+  # Build only this board (a profiles/ name); empty builds all. Set it from
+  # the Run workflow button; the 3A test branch defaults to licheepi-3a.
+  BOARDS: ${{ inputs.boards || (github.ref_name == 'claude/project-thread-cv8ehe' && 'licheepi-3a') || '' }}
 
 concurrency:
   group: ${{ github.head_ref || github.run_id }}
@@ -20,6 +23,12 @@ concurrency:
       - claude/project-thread-cv8ehe
     tags:
       - v*
+  workflow_dispatch:
+    inputs:
+      boards:
+        description: Board to build (a profiles/ name, e.g. licheepi-3a). Empty builds all.
+        required: false
+        default: ''
   pull_request:
     branches:
       - main
@@ -88,7 +97,8 @@ jobs:
         if: github.event_name != 'pull_request'
         run: |
           make PUSH=true
-          make PUSH=true TAG=latest
+          # a single-board overlay must not replace latest
+          if [ -z "${BOARDS}" ]; then make PUSH=true TAG=latest; fi
       - name: bootloader-artifacts
         run: |
           make bootloader-artifacts
