@@ -1,0 +1,36 @@
+From 0000000000000000000000000000000000000000 Mon Sep 17 00:00:00 2001
+From: Claude <noreply@anthropic.com>
+Date: Wed, 7 Oct 2026 03:10:00 +0000
+Subject: [PATCH 19/19] spacemit: k1: don't require SPI NOR in SPL
+
+The LicheePi 3A has no SPI NOR. Its SPL reached "DDR is ready" and then
+nor_early_init() panicked with "Fail to detect spi controller" inside
+board_init_f(), before board_boot_order() ever ran. This happens on a cold
+boot too, so it isn't a stale boot flag. Log a missing SPI controller and
+carry on to the eMMC/SD boot devices.
+---
+ board/spacemit/k1/spl.c | 10 ++++++++--
+ 1 file changed, 8 insertions(+), 2 deletions(-)
+
+--- a/board/spacemit/k1/spl.c
++++ b/board/spacemit/k1/spl.c
+@@ -419,9 +419,15 @@
+ 	struct udevice *dev;
+ 	int ret;
+ 
++	/*
++	 * Boards without SPI NOR (like the LicheePi 3A) still boot from eMMC
++	 * or SD, so don't stop here when there's no SPI controller.
++	 */
+ 	ret = uclass_get_device(UCLASS_SPI, 0, &dev);
+-	if (ret)
+-		panic("Fail to detect spi controller.\n");
++	if (ret) {
++		log_info("Fail to detect spi controller:%d\n", ret);
++		return;
++	}
+ 	udelay(10);
+ 	ret = uclass_get_device(UCLASS_SPI_FLASH, 0, &dev);
+ 	if (ret)
+-- 
+2.43.0
