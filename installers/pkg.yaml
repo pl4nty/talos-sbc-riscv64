@@ -24,6 +24,12 @@ dependencies:
     platform: linux/riscv64
     from: /dtb/spacemit/k1-bananapi-f3.dtb
     to: /rootfs/artifacts/riscv64/dtb/spacemit/k1-bananapi-f3.dtb
+  # Our kernel's 3A DT (BPI-F3 + carrier fan, USB hub fix); the installer
+  # installs it under the BPI-F3 name U-Boot loads.
+  - image: "{{ .BUILD_ARG_PKGS_PREFIX }}/kernel:{{ .BUILD_ARG_PKGS }}"
+    platform: linux/riscv64
+    from: /dtb/spacemit/k1-lichee-pi-3a.dtb
+    to: /rootfs/artifacts/riscv64/dtb/spacemit/k1-lichee-pi-3a.dtb
   {{ end }}
   {{ if or (not .BUILD_ARG_BOARDS) (eq .BUILD_ARG_BOARDS "licheepi-4a") }}
   - stage: licheepi-4a
