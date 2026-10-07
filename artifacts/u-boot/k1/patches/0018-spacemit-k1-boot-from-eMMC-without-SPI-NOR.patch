@@ -1,0 +1,65 @@
+From 0000000000000000000000000000000000000000 Mon Sep 17 00:00:00 2001
+From: Claude <noreply@anthropic.com>
+Date: Wed, 7 Oct 2026 03:10:00 +0000
+Subject: [PATCH 18/18] spacemit: k1: boot from eMMC without SPI NOR
+
+The LicheePi 3A has no SPI NOR. Its SPL got as far as "DDR is ready",
+then nor_early_init() panicked with "Fail to detect spi controller"
+before it ever picked a boot device. Only log a missing SPI controller.
+
+Also try eMMC and then SD after the device read_boot_mode() picks, and
+log the raw boot mode and strap registers, so a wrong guess there falls
+through to a device that works instead of halting.
+---
+ board/spacemit/k1/spl.c | 28 ++++++++++++++++++++++++++--
+ 1 file changed, 26 insertions(+), 2 deletions(-)
+
+--- a/board/spacemit/k1/spl.c
++++ b/board/spacemit/k1/spl.c
+@@ -419,9 +419,16 @@
+ 	struct udevice *dev;
+ 	int ret;
+ 
++	/*
++	 * Boards without SPI NOR (like the LicheePi 3A) can still boot from
++	 * eMMC or SD, so a missing controller is only fatal when booting
++	 * from SPI.
++	 */
+ 	ret = uclass_get_device(UCLASS_SPI, 0, &dev);
+-	if (ret)
+-		panic("Fail to detect spi controller.\n");
++	if (ret) {
++		log_info("Fail to detect spi controller:%d\n", ret);
++		return;
++	}
+ 	udelay(10);
+ 	ret = uclass_get_device(UCLASS_SPI_FLASH, 0, &dev);
+ 	if (ret)
+@@ -504,6 +511,25 @@
+ 	return ret;
+ }
+ 
++/*
++ * Try the device the boot ROM reports first, then fall back to eMMC and SD.
++ * The LicheePi 3A ROM boots from eMMC with no SPI NOR fitted, so the mode
++ * read above isn't enough on its own to pick a device that works.
++ */
++void board_boot_order(u32 *spl_boot_list)
++{
++	static const u32 fallback[] = { BOOT_DEVICE_MMC1, BOOT_DEVICE_MMC2 };
++	int i, n = 0;
++
++	spl_boot_list[n++] = spl_boot_device();
++	for (i = 0; i < ARRAY_SIZE(fallback); i++)
++		if (fallback[i] != spl_boot_list[0])
++			spl_boot_list[n++] = fallback[i];
++	log_info("Boot mode:0x%x strap:0x%x\n",
++		 readl((void __iomem *)BOOT_DEV_FLAG_REG),
++		 readl((void __iomem *)BOOT_PIN_SEL_REG));
++}
++
+ void spl_board_init(void)
+ {
+ }
+-- 
+2.43.0

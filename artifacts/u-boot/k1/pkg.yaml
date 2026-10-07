@@ -27,6 +27,7 @@
 #              https://patchwork.ozlabs.org/series/522006/
 #   0016       LicheePi 3A EEPROM name -> BPI-F3 DT, and fdtfile from the DT.
 #   0017       Load U-Boot from a raw sector of eMMC boot0, not a GPT partition.
+#   0018       Boot without SPI NOR (LicheePi 3A): no panic, eMMC/SD fallback.
 # Drop each once it lands in a tagged release.
 name: u-boot-k1
 variant: scratch
