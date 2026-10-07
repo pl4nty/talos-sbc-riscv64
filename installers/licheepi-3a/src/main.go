@@ -6,6 +6,7 @@ package main
 
 import (
 	"context"
+	"os"
 	"path/filepath"
 
 	"github.com/siderolabs/go-copy/copy"
@@ -46,5 +47,18 @@ func (i *licheePi3AInstaller) Install(ctx context.Context, options overlay.Insta
 	// There's no upstream LicheePi 3A DTS. U-Boot sets fdtfile to the BPI-F3
 	// DTB, which matches the 3A (both are the K1 reference design), and the
 	// EFI loader reads it from dtb/ on the ESP.
-	return copy.Dir(filepath.Join(options.ArtifactsPath, "riscv64/dtb"), filepath.Join(options.MountPrefix, "/boot/EFI/dtb"))
+	dtb := filepath.Join(options.MountPrefix, "/boot/EFI/dtb")
+	if err := copy.Dir(filepath.Join(options.ArtifactsPath, "riscv64/dtb"), dtb); err != nil {
+		return err
+	}
+
+	// Our kernel adds k1-lichee-pi-3a.dtb: the BPI-F3 DT plus the carrier's
+	// fan control. Install it under the BPI-F3 name U-Boot loads, since this
+	// overlay only ever runs on a 3A.
+	lpi3a := filepath.Join(dtb, "spacemit/k1-lichee-pi-3a.dtb")
+	if _, err := os.Stat(lpi3a); err == nil {
+		return copy.File(lpi3a, filepath.Join(dtb, "spacemit/k1-bananapi-f3.dtb"))
+	}
+
+	return nil
 }
