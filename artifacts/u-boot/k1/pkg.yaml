@@ -30,6 +30,7 @@
 #   0018       SPL boot order: detected device, then eMMC, SD, SPI.
 #   0019       Don't panic in SPL when there's no SPI NOR (LicheePi 3A).
 #   0020       Turn the LicheePi 3A carrier fan (GPIO_79) on in SPL.
+#   0021       ethaddr/eth1addr from the TLV EEPROM, so the OS gets stable MACs.
 # Drop each once it lands in a tagged release.
 name: u-boot-k1
 variant: scratch

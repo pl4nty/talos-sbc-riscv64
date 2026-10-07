@@ -1,0 +1,45 @@
+From 42aa81dee15527ff004969a8cd1c201ec1b85bf4 Mon Sep 17 00:00:00 2001
+From: Claude <noreply@anthropic.com>
+Date: Wed, 7 Oct 2026 04:41:31 +0000
+Subject: [PATCH] spacemit: k1: set MAC addresses from the TLV EEPROM
+
+K1 boards store their MAC base in the ONIE TLV EEPROM that SPL already
+reads for the product name, but nothing turns it into ethaddr/eth1addr.
+The kernel then picks random MACs, so the board gets a new DHCP lease on
+every boot. Read the MACs in board_late_init(); fdt_fixup_ethernet() then
+adds local-mac-address to the DT handed to the OS. Errors are ignored so
+boards without the EEPROM still boot.
+---
+ board/spacemit/k1/board.c | 9 +++++++++
+ 1 file changed, 9 insertions(+)
+
+diff --git a/board/spacemit/k1/board.c b/board/spacemit/k1/board.c
+index f89db5b8..86b1a2eb 100644
+--- a/board/spacemit/k1/board.c
++++ b/board/spacemit/k1/board.c
+@@ -7,6 +7,7 @@
+ #include <linux/kernel.h>
+ #include <asm/global_data.h>
+ #include <fdt_support.h>
++#include <init.h>
+ 
+ #ifndef CONFIG_SPL_BUILD
+ DECLARE_GLOBAL_DATA_PTR;
+@@ -28,6 +29,14 @@ int board_late_init(void)
+ {
+ 	int i;
+ 
++	/*
++	 * Set ethaddr/eth1addr from the TLV EEPROM's MAC base, so the EFI DT
++	 * fixup hands the kernel stable MACs instead of random ones. Boards
++	 * without the EEPROM keep booting.
++	 */
++	if (IS_ENABLED(CONFIG_CMD_TLV_EEPROM))
++		mac_read_from_eeprom();
++
+ 	if (env_get("fdtfile"))
+ 		return 0;
+ 
+-- 
+2.43.0
+
