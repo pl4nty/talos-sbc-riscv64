@@ -195,6 +195,12 @@ images:
 	  $(MAKE) image-$$target IMAGER_ARGS="--overlay-name $$target --overlay-image $(REGISTRY_AND_USERNAME)/$(TARGETS):$(TAG)" ; \
 	done
 
+installer-images:
+	@for profile in profiles/$(or $(BOARDS),*)/; do \
+	  target=$$(basename "$${profile}") && \
+	  $(MAKE) image-installer IMAGER_ARGS="--overlay-name $$target --overlay-image $(REGISTRY_AND_USERNAME)/$(TARGETS):$(TAG) --output /out/installer-$$target" || exit 1 ; \
+	done
+
 bootloader-artifacts:
 	@$(MAKE) local-$(TARGETS) DEST=$(ARTIFACTS)
 
