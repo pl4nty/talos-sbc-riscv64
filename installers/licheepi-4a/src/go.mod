@@ -2,12 +2,12 @@ module licheepi-4a
 
 go 1.26.5
 
-toolchain go1.27.1
+toolchain go1.27.2
 
 require (
 	github.com/siderolabs/go-copy v0.1.0
-	github.com/siderolabs/talos/pkg/machinery v1.14.0
-	golang.org/x/sys v0.47.0
+	github.com/siderolabs/talos/pkg/machinery v1.14.2
+	golang.org/x/sys v0.49.0
 )
 
 require (
